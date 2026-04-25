@@ -2,7 +2,6 @@
 
 import DashboardTopbar, { type DashboardTopbarProps } from "./DashboardTopbar";
 import DashboardSidebar, { type DashboardSidebarProps } from "./DashboardSidebar";
-import SearchBar, { type SearchBarProps } from "./searchBar";
 import NoteCard, { type NoteCardProps } from "./noteCard";
 
 // ── Types ──────────────────────────────────────────────────────────────
@@ -10,7 +9,6 @@ import NoteCard, { type NoteCardProps } from "./noteCard";
 export interface DashboardProps {
   topbar: DashboardTopbarProps;
   sidebar: DashboardSidebarProps;
-  search: SearchBarProps;
   pageTitle: string;
   notes: NoteCardProps[];
   emptyStateMessage?: string;
@@ -20,7 +18,6 @@ export interface DashboardProps {
 
 export type { DashboardTopbarProps } from "./DashboardTopbar";
 export type { DashboardSidebarProps, SidebarLink } from "./DashboardSidebar";
-export type { SearchBarProps } from "./searchBar";
 export type { NoteCardProps } from "./noteCard";
 
 // ── Component ──────────────────────────────────────────────────────────

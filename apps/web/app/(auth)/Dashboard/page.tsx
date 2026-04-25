@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Dashboard, { type DashboardProps } from "../../components/dashboard/dashboard";
 
-const dashboardData: Omit<DashboardProps, "search"> = {
+const dashboardData: DashboardProps = {
     topbar: {
         logoText: "MeetingMind",
         logoHref: "/Dashboard",
@@ -88,7 +88,6 @@ export default function Page() {
     return (
         <Dashboard
             {...dashboardData}
-            search={searchProps}
             notes={filteredNotes}
         />
     );
