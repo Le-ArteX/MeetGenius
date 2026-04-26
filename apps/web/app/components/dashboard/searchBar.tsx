@@ -1,41 +1,54 @@
 "use client";
 
-// ── Types ──────────────────────────────────────────────────────────────
+import { useState } from "react";
 
 export interface SearchBarProps {
-  placeholder: string;
-  value: string;
-  onChange?: (value: string) => void;
+  placeholder?: string;
+  onSearch?: (value: string) => void;
 }
 
-// ── Component ──────────────────────────────────────────────────────────
+export default function SearchBar({ placeholder = "Search notes...", onSearch }: SearchBarProps) {
+  const [value, setValue] = useState("");
 
-export default function SearchBar(props: SearchBarProps) {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setValue(e.target.value);
+    onSearch?.(e.target.value);
+  };
+
   return (
-    <div className="relative w-full max-w-sm">
-      {/* Search icon */}
-      <svg
-        className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={2}
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+    <div className="w-full max-w-md">
+      <div className="relative flex items-center w-full h-10 px-3 rounded-xl border border-zinc-200 bg-zinc-50/50 hover:bg-white hover:border-zinc-300 focus-within:bg-white focus-within:border-blue-400 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all duration-200 group">
+        <div className="shrink-0 mr-2.5">
+          <svg 
+            className="w-4 h-4 text-zinc-400 group-focus-within:text-blue-500 transition-colors" 
+            fill="none" 
+            viewBox="0 0 24 24" 
+            stroke="currentColor" 
+            strokeWidth={2.5}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 105 11a6 6 0 0012 0z" />
+          </svg>
+        </div>
+        
+        <input
+          type="text"
+          value={value}
+          onChange={handleChange}
+          placeholder={placeholder}
+          className="flex-1 bg-transparent border-none outline-none text-sm text-zinc-800 placeholder-zinc-400 h-full w-full"
         />
-      </svg>
-
-      <input
-        id="search-notes-input"
-        type="text"
-        value={props.value}
-        onChange={(e) => props.onChange?.(e.target.value)}
-        placeholder={props.placeholder}
-        className="w-full text-sm text-zinc-700 placeholder-zinc-400 bg-zinc-50 border border-zinc-200 rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 hover:border-zinc-300 transition-all"
-      />
+        
+        {value && (
+          <button
+            onClick={() => { setValue(""); onSearch?.(""); }}
+            className="ml-2 p-1 rounded-md text-zinc-400 hover:text-zinc-600 hover:bg-zinc-200/50 transition-colors"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
+      </div>
     </div>
   );
 }

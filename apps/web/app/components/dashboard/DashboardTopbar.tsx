@@ -1,98 +1,55 @@
 "use client";
 
 import Link from "next/link";
-
-// ── Types ──────────────────────────────────────────────────────────────
-
-export interface Workspace {
-  id: string;
-  name: string;
-}
-
-export interface UserProfile {
-  initials: string;
-  avatarUrl?: string;
-  name: string;
-}
+import { useRouter } from "next/navigation";
+import SearchBar from "./searchBar";
+import Logo from "../logo/logo";
 
 export interface DashboardTopbarProps {
   logoText: string;
   logoHref: string;
-  workspaces: Workspace[];
-  activeWorkspaceId: string;
-  onWorkspaceChange?: (id: string) => void;
+  workspaceName?: string;
   ctaLabel: string;
   onCtaClick?: () => void;
-  user: UserProfile;
+  onSearch?: (value: string) => void;
+  logo?: React.ReactNode;
 }
 
-// ── Component ──────────────────────────────────────────────────────────
 
-export default function DashboardTopbar(props: DashboardTopbarProps) {
+export default function DashboardTopbar(props:DashboardTopbarProps) {
+  const router = useRouter();
   return (
-    <header className="sticky top-0 z-50 flex items-center justify-between h-14 px-6 border-b border-zinc-200 bg-white">
-      {/* Left – Brand name */}
-      <Link href={props.logoHref} className="text-base font-bold tracking-tight text-zinc-900">
-        {props.logoText}
-      </Link>
-
-      {/* Centre – Workspace selector */}
-      <div className="hidden sm:flex items-center">
-        <div className="relative">
-          <select
-            id="workspace-select"
-            value={props.activeWorkspaceId}
-            onChange={(e) => props.onWorkspaceChange?.(e.target.value)}
-            className="appearance-none text-sm text-zinc-700 font-medium bg-white border border-zinc-300 rounded-md pl-3 pr-8 py-1.5 hover:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all cursor-pointer"
-          >
-            {props.workspaces.map((ws) => (
-              <option key={ws.id} value={ws.id}>
-                {ws.name}
-              </option>
-            ))}
-          </select>
-          {/* Chevron icon */}
-          <svg
-            className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-          </svg>
+    <header className="flex items-center justify-between px-6 border-b border-zinc-200 bg-white h-16 shrink-0">
+      <div className="flex items-center gap-8 flex-1">
+        <Link href={props.logoHref} className="text-lg font-bold text-zinc-900 tracking-tight shrink-0">
+          {props.logoText}
+        </Link>
+        
+        <div className="hidden md:flex flex-1 max-w-md">
+          <SearchBar onSearch={props.onSearch} />
         </div>
       </div>
 
-      {/* Right – CTA + avatar */}
       <div className="flex items-center gap-3">
-        <button
-          id="new-note-btn"
-          onClick={props.onCtaClick}
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-white bg-zinc-900 px-4 py-1.5 rounded-lg hover:bg-zinc-700 active:scale-[0.97] transition-all"
-        >
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+        <button className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-200 text-sm text-zinc-700 font-medium hover:bg-zinc-50 transition-colors">
+          {props.workspaceName}
+          <svg className="w-3.5 h-3.5 text-zinc-400 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
           </svg>
-          {props.ctaLabel}
         </button>
 
-        {/* Avatar */}
+        <div className="h-6 w-px bg-zinc-200 mx-1 hidden lg:block" />
+
         <button
-          id="user-avatar-btn"
-          className="flex items-center justify-center w-9 h-9 rounded-full bg-zinc-900 text-white text-sm font-semibold hover:ring-2 hover:ring-zinc-400/40 transition-all"
-          title={props.user.name}
-        >
-          {props.user.avatarUrl ? (
-            <img
-              src={props.user.avatarUrl}
-              alt={props.user.name}
-              className="w-full h-full rounded-full object-cover"
-            />
-          ) : (
-            props.user.initials
-          )}
+          onClick={props.onCtaClick}
+          className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-zinc-900 text-white text-sm font-medium hover:bg-zinc-700 transition-colors whitespace-nowrap cursor-pointer">
+          {props.ctaLabel}
         </button>
+        <div
+          className="w-8 h-8 rounded-full bg-zinc-900 text-white flex items-center justify-center text-sm font-semibold shrink-0 cursor-pointer"
+          onClick={() => { router.push(props.logoHref); }} >
+          {props.logo}
+        </div>
       </div>
     </header>
   );

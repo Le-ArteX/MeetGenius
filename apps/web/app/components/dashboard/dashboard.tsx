@@ -1,68 +1,67 @@
 "use client";
 
-import DashboardTopbar, { type DashboardTopbarProps } from "./DashboardTopbar";
-import DashboardSidebar, { type DashboardSidebarProps } from "./DashboardSidebar";
-import NoteCard, { type NoteCardProps } from "./noteCard";
+import DashboardTopbar from "./DashboardTopbar";
+import Logo from "../logo/logo";
+import DashboardSidebar, { SidebarLink } from "./DashboardSidebar";
+import NoteCard, { NoteCardProps } from "./noteCard";
 
-// ── Types ──────────────────────────────────────────────────────────────
+const sidebarLinks: SidebarLink[] = [
+  { id: "notes", label: "Notes", href: "/dashboard", icon: "notes" },
+  { id: "workspaces", label: "Workspaces", href: "/dashboard/workspaces", icon: "workspaces" },
+  { id: "billing", label: "Billing", href: "/dashboard/billing", icon: "billing" },
+  { id: "settings", label: "Settings", href: "/dashboard/settings", icon: "settings" },
+];
 
-export interface DashboardProps {
-  topbar: DashboardTopbarProps;
-  sidebar: DashboardSidebarProps;
-  pageTitle: string;
-  notes: NoteCardProps[];
-  emptyStateMessage?: string;
-}
+const sampleNotes: NoteCardProps[] = [
+  {
+    id: "1",
+    title: "Weekly Standup",
+    preview: "Discussed Q1 targets, sprint velocity......Discussed Q1 targets, sprint velocity......Discussed Q1 targets, sprint velocity......Discussed Q1 targets, sprint velocity......Discussed Q1 targets, sprint velocity......Discussed Q1 targets, sprint velocity......Discussed Q1 targets, sprint velocity......Discussed Q1 targets, sprint velocity......Discussed Q1 targets, sprint velocity......Discussed Q1 targets, sprint velocity......Discussed Q1 targets, sprint velocity......Discussed Q1 targets, sprint velocity......",
+    date: "Jan 12",
+    actionCount: 3,
+  },
+  {
+    id: "2",
+    title: "Client Call - Acme",
+    preview: "Client requested dashboard redesign......",
+    date: "Jan 10",
+    actionCount: 5,
+  },
+  {
+    id: "3",
+    title: "Design Review",
+    preview: "Approved new dashboard mockups......",
+    date: "Jan 8",
+    actionCount: 2,
+  },
+  {
+    id: "4",
+    title: "Sprint Planning",
+    preview: "Selected 14 story points for sprint......",
+    date: "Jan 6",
+    actionCount: 8,
+  },
+];
 
-// ── Re-exports for convenience ─────────────────────────────────────────
-
-export type { DashboardTopbarProps } from "./DashboardTopbar";
-export type { DashboardSidebarProps, SidebarLink } from "./DashboardSidebar";
-export type { NoteCardProps } from "./noteCard";
-
-// ── Component ──────────────────────────────────────────────────────────
-
-export default function Dashboard(props: DashboardProps) {
+export default function Dashboard() {
   return (
-    <div className="flex flex-col h-screen bg-white">
-      {/* ── Top bar ─────────────────────────────────────────────── */}
-      <DashboardTopbar {...props.topbar} />
+    <div className="h-screen flex flex-col bg-white">
+      <DashboardTopbar
+        logoText="MeetGenius"
+        logoHref="/dashboard"
+        workspaceName="My Workspace"
+        ctaLabel="+ Note"
+        logo={<Logo />}
+        onSearch={(val) => console.log("Searching for:", val)}/>
 
-      {/* ── Body: sidebar + main ────────────────────────────────── */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
-        <DashboardSidebar {...props.sidebar} />
-
-        {/* Main content */}
-        <main className="flex-1 overflow-y-auto">
-          <div className="max-w-3xl mx-auto px-6 py-8">
-            {/* Page header */}
-            <div className="mb-8">
-              <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">
-                {props.pageTitle}
-              </h1>
-            </div>
-
-            {/* Notes list */}
-            {props.notes.length > 0 ? (
-              <div className="flex flex-col gap-3">
-                {props.notes.map((note) => (
-                  <NoteCard key={note.id} {...note} />
-                ))}
-              </div>
-            ) : (
-              /* Empty state */
-              <div className="flex flex-col items-center justify-center py-20 text-center">
-                <div className="w-16 h-16 rounded-2xl bg-zinc-100 flex items-center justify-center mb-4">
-                  <svg className="w-8 h-8 text-zinc-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                  </svg>
-                </div>
-                <p className="text-sm text-zinc-400">
-                  {props.emptyStateMessage ?? "No notes yet. Create your first note!"}
-                </p>
-              </div>
-            )}
+      <div className="flex flex-1 min-h-0">
+        <DashboardSidebar links={sidebarLinks} activeLinkId="notes" />
+        <main className="flex-1 overflow-y-auto px-6 py-8 bg-zinc-50/30">
+          <h1 className="text-3xl font-bold text-zinc-900 mb-8">Notes</h1>
+          <div className="flex flex-col gap-4 w-full">
+            {sampleNotes.map((note) => (
+              <NoteCard key={note.id} {...note} />
+            ))}
           </div>
         </main>
       </div>
