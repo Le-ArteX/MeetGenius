@@ -14,6 +14,8 @@ export interface DashboardSidebarProps {
   activeLinkId: string;
 }
 
+
+
 function SidebarIcon({ icon, className }: { icon: SidebarLink["icon"]; className?: string }) {
   const cls = className ?? "w-4 h-4";
   switch (icon) {

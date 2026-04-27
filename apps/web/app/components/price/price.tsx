@@ -13,17 +13,20 @@ export interface PricePlanProps {
 
 export interface PriceProps {
     plans: PricePlanProps[];
+    className?: string;
 }
 
 export default function Price(props: PriceProps) {
+    const gridCols = props.plans?.length === 2 ? "md:grid-cols-2 max-w-4xl" : "md:grid-cols-3";
+
     return (
-        <section id="price" className="py-24 bg-white">
-            <div className="max-w-7xl mx-auto px-6">
-                <div className="grid md:grid-cols-3 gap-8 mx-auto">
+        <section id="price" className={props.className ?? "py-24 bg-white"}>
+            <div className="max-w-5xl ml-auto px-6">
+                <div className={`grid ${gridCols} gap-8 items-stretch`}>
                     {props.plans?.map((plan, i) => {
                         const isDark = plan.variant === "dark";
                         return (
-                            <div key={i} className={`p-10 rounded-4xl border flex flex-col h-full transition-all hover:scale-[1.02] relative ${isDark
+                            <div key={i} className={`p-10 rounded-4xl border flex flex-col transition-all hover:scale-[1.02] relative ${isDark
                                 ? "bg-zinc-900 border-zinc-800 text-white shadow-2xl"
                                 : "bg-white border-zinc-200 text-zinc-900 shadow-sm"
                                 }`}>

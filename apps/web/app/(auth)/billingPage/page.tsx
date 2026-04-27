@@ -1,11 +1,10 @@
-// import BillingPage from "../../components/billing/billing";
-// import Dashboard from "../../components/dashboard/dashboard";
+import BillingPage from "../../components/billing/billing";
 
-// export default function Page() {
-//   return (
-//     <>
-//     <Dashboard/>
-//     <BillingPage />
-//     </>
-//   )
-// }
+
+export default function Page() {
+  return (
+    <>
+      <BillingPage />
+    </>
+  )
+}
