@@ -67,7 +67,7 @@ export default function Login() {
 
                     <button
                         type="submit"
-                        className="space-y-6 w-full mt-4 py-3 bg-zinc-900 text-white font-bold rounded-xl hover:bg-zinc-800 transition-colors shadow-lg shadow-zinc-900/10 active:scale-[0.98] cursor-pointer">
+                        className="space-y-6 w-full mt-2 py-3 bg-zinc-900 text-white font-bold rounded-xl hover:bg-zinc-800 transition-colors shadow-lg shadow-zinc-900/10 active:scale-[0.98] cursor-pointer">
                         Sign in
                     </button>
                 </form>

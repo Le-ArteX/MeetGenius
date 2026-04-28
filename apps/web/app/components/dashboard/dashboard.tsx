@@ -51,6 +51,7 @@ export default function Dashboard() {
         logoHref="/dashboard"
         workspaceName="My Workspace"
         ctaLabel="+ Note"
+        ctaHref="/dashboard/new"
         logo={<Logo />}
         onSearch={(val) => console.log("Searching for:", val)}/>
 

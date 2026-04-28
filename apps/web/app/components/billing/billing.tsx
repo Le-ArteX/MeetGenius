@@ -1,8 +1,9 @@
+"use client";
+
 import DashboardTopbar from "../../components/dashboard/DashboardTopbar";
 import Logo from "../../components/logo/logo";
 import DashboardSidebar, { SidebarLink } from "../dashboard/DashboardSidebar";
 import Price from "../price/price";
-
 
 const sidebarLinks: SidebarLink[] = [
   { id: "notes", label: "Notes", href: "/dashboard", icon: "notes" },
@@ -17,7 +18,6 @@ export default function BillingPage() {
   const pct = (notesUsed / notesLimit) * 100;
 
   return (
-
     <div className="h-screen flex flex-col bg-white">
       <DashboardTopbar
         logoText="MeetGenius"
