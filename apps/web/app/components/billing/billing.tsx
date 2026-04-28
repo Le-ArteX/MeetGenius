@@ -31,10 +31,10 @@ export default function BillingPage() {
 
         <main className="flex-1 overflow-y-auto pl-2 py-8 bg-white">
           <div className="w-full max-w-480 ml-auto px-6">
-            <h1 className="text-2xl font-bold text-zinc-900 mb-8">Billing</h1>
+            <h1 className="text-3xl font-bold text-zinc-900 mb-8">Billing</h1>
 
-              <Price
-                className="px-6 py-2 w-1200px max-w-7xl ml-auto"
+            <Price
+              className="px-6 py-2 w-1200px max-w-7xl ml-auto"
               plans={[
                 {
                   name: "Free",

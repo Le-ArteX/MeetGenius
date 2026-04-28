@@ -16,11 +16,11 @@ export default function SearchBar({ placeholder = "Search notes...", onSearch }:
   };
 
   return (
-    <div className="w-full max-w-md">
-      <div className="relative flex items-center w-full h-10 px-3 rounded-xl border border-zinc-200 bg-zinc-50/50 hover:bg-white hover:border-zinc-300 focus-within:bg-white focus-within:border-blue-400 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all duration-200 group">
+    <div className="w-full max-w-xs">
+      <div className="relative flex items-center w-full h-10 px-3 rounded-xl border border-zinc-200 bg-zinc-50/50 hover:bg-white hover:border-zinc-300 focus-within:bg-white focus-within:border-zinc-400 transition-all duration-200 group">
         <div className="shrink-0 mr-2.5">
           <svg 
-            className="w-4 h-4 text-zinc-400 group-focus-within:text-blue-500 transition-colors" 
+            className="w-4 h-4 text-zinc-400 group-focus-within:text-zinc-600 transition-colors" 
             fill="none" 
             viewBox="0 0 24 24" 
             stroke="currentColor" 

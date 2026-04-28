@@ -1,5 +1,4 @@
-import BillingPage from "../../components/billing/billing";
-
+import BillingPage from "../../../components/billing/billing";
 
 export default function Page() {
   return (

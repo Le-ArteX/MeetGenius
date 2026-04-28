@@ -51,8 +51,7 @@ export default function DashboardSidebar({ links, activeLinkId }: DashboardSideb
   return (
     <aside
       className="hidden md:flex flex-col w-56 shrink-0 py-6 px-4 gap-1"
-      style={{ borderRight: "1px solid #e4e4e7", backgroundColor: "#ffffff" }}
-    >
+      style={{ borderRight: "1px solid #e4e4e7", backgroundColor: "#ffffff" }}>
       {links.map((link) => {
         const isActive = link.id === activeLinkId;
         return (
@@ -60,11 +59,12 @@ export default function DashboardSidebar({ links, activeLinkId }: DashboardSideb
             key={link.id}
             href={link.href}
             className={[
-              "group flex items-center gap-3 px-4 py-3 rounded-xl text-base font-semibold transition-all duration-150",
+              "group flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-150",
               isActive
-                ? "bg-blue-50 text-blue-600 shadow-sm shadow-blue-100/50"
+                ? "bg-zinc-100 text-zinc-900 shadow-sm"
                 : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-800",
             ].join(" ")}>
+            <SidebarIcon icon={link.icon} className={`w-4 h-4 ${isActive ? "text-zinc-900" : "text-zinc-400 group-hover:text-zinc-600"}`} />
             {link.label}
           </Link>
         );
