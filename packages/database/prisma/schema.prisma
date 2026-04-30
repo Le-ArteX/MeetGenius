@@ -107,7 +107,7 @@ model ActionItem {
 }
 
 model Invitation {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   invitedBy   String
@@ -136,6 +136,7 @@ model Subscription {
 enum Plan {
   FREE
   PRO
+  ENTERPRISE
 }
 
 enum Role {
