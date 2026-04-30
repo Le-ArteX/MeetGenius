@@ -21,7 +21,7 @@ export default function NewNote() {
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
+
     if (file.type !== "text/plain") {
       setError("Please upload a .txt file");
       return;
@@ -49,7 +49,6 @@ export default function NewNote() {
         logoHref="/dashboard"
         workspaceName="My Workspace"
         ctaLabel="+ Note"
-        ctaHref="/dashboard/new"
         logo={<Logo />}
       />
 
