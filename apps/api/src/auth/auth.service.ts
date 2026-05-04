@@ -1,17 +1,20 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { Injectable, UnauthorizedException, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { RegisterDto } from "./dto/register.dto";
 import { LoginDto } from "./dto/login.dto";
 import * as bcrypt from 'bcrypt';
+import { JwtService } from "@nestjs/jwt";
 
 @Injectable()
 export class AuthService {
-    constructor(private readonly prisma: PrismaService) { }
+    constructor(
+        private readonly prisma: PrismaService,
+        private readonly jwtService: JwtService,
+    ) { }
 
     async register(dto: RegisterDto) {
-
-        if (dto.password != dto.confirmPassword) {
-            throw new UnauthorizedException('Passwords do not match');
+        if (dto.password !== dto.confirmPassword) {
+            throw new BadRequestException('Passwords do not match');
         }
 
         const hashedPassword = await bcrypt.hash(dto.password, 10);
@@ -22,7 +25,11 @@ export class AuthService {
             }
         });
 
-        return user;
+        const token = await this.generateToken(user.id, user.email);
+        return {
+            user,
+            access_token: token,
+        };
     }
 
     async login(dto: LoginDto) {
@@ -36,6 +43,18 @@ export class AuthService {
         if (!isPasswordValid) {
             throw new UnauthorizedException('Incorrect email or password');
         }
-        return user;
+
+        const token = await this.generateToken(user.id, user.email);
+        return {
+            user,
+            access_token: token,
+        };
+    }
+
+    private async generateToken(userId: string, email: string) {
+        return this.jwtService.signAsync({
+            sub: userId,
+            email,
+        });
     }
 }
