@@ -77,7 +77,7 @@ export default function Register() {
 
                     <button
                         type="submit"
-                        className="space-y-6 w-full mt-4 py-3 bg-zinc-900 text-white font-bold rounded-xl hover:bg-zinc-800 transition-colors hover:shadow-xl hover:-translate-y-0.5 shadow-zinc-900/10 active:scale-[0.98] cursor-pointer">
+                        className="space-y-6 w-full mt-4 py-3 bg-zinc-900 text-white font-bold rounded-xl hover:bg-zinc-800 transition-colors hover:shadow-xl  shadow-zinc-900/10 active:scale-[0.98] cursor-pointer">
                         Create account
                     </button>
                 </form>
