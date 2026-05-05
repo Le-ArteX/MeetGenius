@@ -8,6 +8,7 @@ import { UsersModule } from './users/users.module';
 import { WorkspaceModule } from './workspace/workspace.module';
 import { NoteModule } from './note/note.module';
 import { BillModule } from './bill/bill.module';
+import { MailModule } from './mail/mail.module';
 
 
 @Module({
@@ -19,6 +20,7 @@ import { BillModule } from './bill/bill.module';
     WorkspaceModule,
     NoteModule,
     BillModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],
