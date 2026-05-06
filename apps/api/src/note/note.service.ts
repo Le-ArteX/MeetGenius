@@ -1,4 +1,4 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { ForbiddenException, Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateNoteDto } from "./dto/create-note.dto";
 import { OpenAI } from 'openai';
@@ -26,6 +26,27 @@ export class NoteService {
     }
 
     async create(userId: string, dto: CreateNoteDto) {
+        // If workspaceId is provided, verify membership
+        if (dto.workspaceId) {
+            const membership = await this.prisma.workspaceMember.findUnique({
+                where: {
+                    userId_workspaceId: {
+                        userId,
+                        workspaceId: dto.workspaceId,
+                    },
+                },
+            });
+            
+            if (!membership) {
+                throw new ForbiddenException('You are not a member of this workspace');
+            }
+
+            // Viewers cannot create notes in a workspace
+            if (membership.role === 'VIEWER') {
+                throw new ForbiddenException('Viewers cannot create notes in this workspace');
+            }
+        }
+
         const note = await this.prisma.note.create({
             data: {
                 title: dto.title,
@@ -102,7 +123,7 @@ export class NoteService {
                     data: {
                         summary: result.summary,
                         keyDecision: result.keyDecisions,
-                        wordCount: transcript.trim().split(/\s+/).length,
+                        wordCount: transcript.trim() ? transcript.trim().split(/\s+/).length : 0,
                     },
                 });
 
@@ -126,8 +147,28 @@ export class NoteService {
     async findAll(userId: string, workspaceId?: string) {
         return this.prisma.note.findMany({
             where: {
-                userId,
-                ...(workspaceId ? { workspaceId } : {}),
+                ...(workspaceId
+                    ? {
+                        workspaceId,
+                        workspace: {
+                            members: {
+                                some: { userId }
+                            }
+                        }
+                    }
+                    : {
+                        OR: [
+                            { userId },
+                            {
+                                workspace: {
+                                    members: {
+                                        some: { userId }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ),
             },
             include: {
                 actionItems: true,
@@ -140,14 +181,50 @@ export class NoteService {
 
     async findOne(userId: string, id: string) {
         return this.prisma.note.findFirst({
-            where: { id, userId },
+            where: {
+                id,
+                OR: [
+                    { userId },
+                    {
+                        workspace: {
+                            members: {
+                                some: { userId }
+                            }
+                        }
+                    }
+                ]
+            },
             include: { actionItems: true },
         });
     }
 
     async delete(userId: string, id: string) {
+        const note = await this.prisma.note.findUnique({
+            where: { id },
+            include: { 
+                workspace: { 
+                    include: { 
+                        members: { where: { userId } } 
+                    } 
+                } 
+            }
+        });
+
+        if (!note) throw new NotFoundException('Note not found');
+
+        // Allow deletion if:
+        // 1. User is the creator
+        // 2. User is an OWNER or EDITOR in the workspace where the note belongs
+        const isCreator = note.userId === userId;
+        const workspaceMember = note.workspace?.members[0];
+        const hasWorkspacePermission = workspaceMember && ['OWNER', 'EDITOR'].includes(workspaceMember.role);
+
+        if (!isCreator && !hasWorkspacePermission) {
+            throw new ForbiddenException('You do not have permission to delete this note');
+        }
+
         return this.prisma.note.delete({
-            where: { id, userId },
+            where: { id },
         });
     }
 }

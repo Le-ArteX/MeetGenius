@@ -9,6 +9,6 @@ export class CreateNoteDto {
   transcript?: string;
 
   @IsOptional()
-  @IsUUID()
+  @IsString()
   workspaceId?: string;
 }
