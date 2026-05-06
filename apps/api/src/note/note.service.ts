@@ -91,7 +91,12 @@ export class NoteService {
 
         try {
             const prompt = `
-                Analyze the following meeting transcript and provide a summary, key decisions, and action items.
+                Analyze the following meeting transcript and provide a comprehensive and detailed summary, 
+                key decisions made, and specific action items.
+                
+                The "summary" field should be thorough, capturing the context, main discussion points, 
+                and any important nuances from the conversation. Aim for a detailed overview rather than a brief sentence.
+                
                 Format the response as JSON with the following structure:
                 {
                     "summary": "...",
