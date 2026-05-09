@@ -77,7 +77,9 @@ export default function Login() {
                             className="w-full px-4 py-3 rounded-xl border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-zinc-50/50 mb-2 disabled:opacity-50"
                         />
                         <div className="flex justify-end">
-                            <Link href="/forgot-password" disabled={loading} className="space-y-6 py-3 text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors">
+                            <Link 
+                                href="/forgotpassword" 
+                                className={`space-y-6 py-3 text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors ${loading ? 'opacity-50 pointer-events-none' : ''}`}>
                                 Forgot Password?
                             </Link>
                         </div>
