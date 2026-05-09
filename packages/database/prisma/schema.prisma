@@ -124,8 +124,8 @@ model Subscription {
   id                 String    @id @default(uuid())
   userId             String    @unique
   user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  stripeCustomerId   String?   @unique
-  stripeSubId        String?   @unique
+  CustomerId         String?   @unique
+  SubId              String?   @unique
   status             SubStatus @default(INACTIVE)
   plan               Plan      @default(FREE)
   currentPeriodStart DateTime?
