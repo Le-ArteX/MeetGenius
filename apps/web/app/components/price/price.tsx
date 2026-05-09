@@ -6,7 +6,8 @@ export interface PricePlanProps {
     price: string;
     features: string[];
     ctaLabel: string;
-    ctaHref: string;
+    ctaHref?: string;
+    onClick?: () => void;
     variant?: string;
     isPopular?: boolean;
 }
@@ -61,14 +62,25 @@ export default function Price(props: PriceProps) {
                                     ))}
                                 </ul>
 
-                                <Link
-                                    href={plan.ctaHref}
-                                    className={`w-full py-3.5 px-6 rounded-xl text-center font-bold text-sm transition-all shadow-sm ${isDark
-                                        ? "bg-white text-zinc-900 hover:bg-zinc-100"
-                                        : "bg-zinc-900 text-white hover:bg-zinc-800"
-                                        }`}>
-                                    {plan.ctaLabel}
-                                </Link>
+                                {plan.onClick ? (
+                                    <button
+                                        onClick={plan.onClick}
+                                        className={`w-full py-3.5 px-6 rounded-xl text-center font-bold text-sm transition-all shadow-sm ${isDark
+                                            ? "bg-white text-zinc-900 hover:bg-zinc-100"
+                                            : "bg-zinc-900 text-white hover:bg-zinc-800"
+                                            }`}>
+                                        {plan.ctaLabel}
+                                    </button>
+                                ) : (
+                                    <Link
+                                        href={plan.ctaHref || "#"}
+                                        className={`w-full py-3.5 px-6 rounded-xl text-center font-bold text-sm transition-all shadow-sm ${isDark
+                                            ? "bg-white text-zinc-900 hover:bg-zinc-100"
+                                            : "bg-zinc-900 text-white hover:bg-zinc-800"
+                                            }`}>
+                                        {plan.ctaLabel}
+                                    </Link>
+                                )}
                             </div>
                         );
                     })}

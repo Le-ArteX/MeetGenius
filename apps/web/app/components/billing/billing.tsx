@@ -1,9 +1,11 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import DashboardTopbar from "../../components/dashboard/DashboardTopbar";
 import Logo from "../../components/logo/logo";
 import DashboardSidebar, { SidebarLink } from "../dashboard/DashboardSidebar";
 import Price from "../price/price";
+import { apiRequest } from "../../lib/api";
 
 const sidebarLinks: SidebarLink[] = [
   { id: "notes", label: "Notes", href: "/dashboard", icon: "notes" },
@@ -13,9 +15,40 @@ const sidebarLinks: SidebarLink[] = [
 ];
 
 export default function BillingPage() {
-  const notesUsed = 4;
-  const notesLimit = 5;
-  const pct = (notesUsed / notesLimit) * 100;
+  const [subscription, setSubscription] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [upgrading, setUpgrading] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchSub() {
+      try {
+        const sub = await apiRequest("/bill/subscription");
+        setSubscription(sub);
+      } catch (err) {
+        console.error("Failed to fetch subscription:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchSub();
+  }, []);
+
+  const handleUpgrade = async (plan: string) => {
+    try {
+      setUpgrading(plan);
+      const { checkoutUrl } = await apiRequest("/bill/checkout", {
+        method: "POST",
+        body: JSON.stringify({ plan }),
+      });
+      window.location.href = checkoutUrl;
+    } catch (err: any) {
+      alert(err.message || "Failed to start checkout");
+    } finally {
+      setUpgrading(null);
+    }
+  };
+
+  const currentPlan = subscription?.plan || "FREE";
 
   return (
     <div className="h-screen flex flex-col bg-white">
@@ -33,43 +66,50 @@ export default function BillingPage() {
           <div className="w-full max-w-480 ml-auto px-6">
             <h1 className="text-3xl font-bold text-zinc-900 mb-8">Billing</h1>
 
-            <Price
-              className="px-6 py-2 w-1200px max-w-7xl ml-auto"
-              plans={[
-                {
-                  name: "Free",
-                  period: "monthly",
-                  price: "$0",
-                  features: ["5 notes/month", "1 workspace"],
-                  ctaLabel: "Subscribed",
-                  ctaHref: "/dashboard/billing",
-                  variant: "light",
-                },
-                {
-                  name: "Pro",
-                  period: "monthly",
-                  price: "$12",
-                  features: ["Unlimited notes", "Team workspaces", "PDF export"],
-                  ctaLabel: "Go Pro",
-                  ctaHref: "/dashboard/billing",
-                  variant: "dark",
-                  isPopular: true,
-                },
-                {
-                  name: "Enterprise",
-                  period: "annually",
-                  price: "$144",
-                  features: ["Unlimited notes", "Team workspaces", "PDF export", "Unlimited Transcription", "File Uploads"],
-                  ctaLabel: "Go Enterprise",
-                  ctaHref: "/dashboard/billing",
-                  variant: "dark",
-                },
-              ]}
-            />
+            {loading ? (
+              <div className="flex items-center justify-center py-20 text-zinc-400 animate-pulse">
+                Loading plans...
+              </div>
+            ) : (
+              <Price
+                className="px-6 py-2 w-1200px max-w-7xl ml-auto"
+                plans={[
+                  {
+                    name: "Free",
+                    period: "monthly",
+                    price: "$0",
+                    features: ["5 notes/month", "1 workspace"],
+                    ctaLabel: currentPlan === "FREE" ? "Current Plan" : "Subscribed",
+                    variant: "light",
+                  },
+                  {
+                    name: "Pro",
+                    period: "monthly",
+                    price: "$12",
+                    features: ["Unlimited notes", "Team workspaces", "PDF export"],
+                    ctaLabel: upgrading === "PRO" ? "Connecting..." : currentPlan === "PRO" ? "Current Plan" : "Go Pro",
+                    onClick: currentPlan === "PRO" ? undefined : () => handleUpgrade("PRO"),
+                    variant: "dark",
+                    isPopular: true,
+                  },
+                  {
+                    name: "Enterprise",
+                    period: "annually",
+                    price: "$144",
+                    features: ["Unlimited notes", "Team workspaces", "PDF export", "Unlimited Transcription", "File Uploads"],
+                    ctaLabel: upgrading === "ENTERPRISE" ? "Connecting..." : currentPlan === "ENTERPRISE" ? "Current Plan" : "Go Enterprise",
+                    onClick: currentPlan === "ENTERPRISE" ? undefined : () => handleUpgrade("ENTERPRISE"),
+                    variant: "dark",
+                  },
+                ]}
+              />
+            )}
 
             <div className="mt-16 p-10 bg-zinc-50 rounded-3xl border border-zinc-100">
               <h2 className="text-lg font-bold text-zinc-900 mb-3">Billing history</h2>
-              <p className="text-sm text-zinc-500">No billing history yet.</p>
+              <p className="text-sm text-zinc-500">
+                {subscription?.lemonSubId ? "You have an active subscription managed via LemonSqueezy." : "No billing history yet."}
+              </p>
             </div>
           </div>
         </main>
