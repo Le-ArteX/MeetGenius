@@ -10,6 +10,7 @@ export default function Login() {
     const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [rememberMe, setRememberMe] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
@@ -76,10 +77,31 @@ export default function Login() {
                             disabled={loading}
                             className="w-full px-4 py-3 rounded-xl border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-zinc-50/50 mb-2 disabled:opacity-50"
                         />
-                        <div className="flex justify-end">
+                        <div className="flex items-center justify-between px-1">
+                            <label className="flex items-center gap-2 cursor-pointer group">
+                                <div className="relative flex items-center justify-center">
+                                    <input
+                                        type="checkbox"
+                                        checked={rememberMe}
+                                        onChange={(e) => setRememberMe(e.target.checked)}
+                                        className="peer appearance-none w-4 h-4 rounded border border-zinc-300 checked:bg-zinc-900 checked:border-zinc-900 transition-all cursor-pointer"
+                                    />
+                                    <svg 
+                                        className="absolute w-2.5 h-2.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" 
+                                        fill="none" 
+                                        viewBox="0 0 24 24" 
+                                        stroke="currentColor" 
+                                        strokeWidth={4}
+                                    >
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                                <span className="text-xs font-medium text-zinc-500 group-hover:text-zinc-700 transition-colors">Remember me</span>
+                            </label>
+
                             <Link 
                                 href="/forgotpassword" 
-                                className={`space-y-6 py-3 text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors ${loading ? 'opacity-50 pointer-events-none' : ''}`}>
+                                className={`py-3 text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors ${loading ? 'opacity-50 pointer-events-none' : ''}`}>
                                 Forgot Password?
                             </Link>
                         </div>
