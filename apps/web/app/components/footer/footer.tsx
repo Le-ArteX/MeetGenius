@@ -69,10 +69,10 @@ export default function Footer() {
                     <div>
                         <h4 className="text-white font-bold mb-6">Company</h4>
                         <ul className="space-y-4 text-sm">
-                            <li><Link href="#" className="hover:text-blue-400 transition-colors">Blog</Link></li>
-                            <li><Link href="#" className="hover:text-blue-400 transition-colors">Careers</Link></li>
-                            <li><Link href="#" className="hover:text-blue-400 transition-colors">Privacy Policy</Link></li>
-                            <li><Link href="#" className="hover:text-blue-400 transition-colors">Terms of Service</Link></li>
+                            <li><Link href="/blog" className="hover:text-blue-400 transition-colors">Blog</Link></li>
+                            <li><Link href="/careers" className="hover:text-blue-400 transition-colors">Careers</Link></li>
+                            <li><Link href="/privacy" className="hover:text-blue-400 transition-colors">Privacy Policy</Link></li>
+                            <li><Link href="/terms" className="hover:text-blue-400 transition-colors">Terms of Service</Link></li>
                         </ul>
                     </div>
 
@@ -95,9 +95,9 @@ export default function Footer() {
                 <div className="pt-8 border-t border-zinc-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs">
                     <p>© {new Date().getFullYear()} MeetGenius. All rights reserved.</p>
                     <div className="flex gap-8">
-                        <Link href="#" className="hover:text-white transition-colors">Privacy</Link>
-                        <Link href="#" className="hover:text-white transition-colors">Terms</Link>
-                        <Link href="#" className="hover:text-white transition-colors">Cookies</Link>
+                        <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
+                        <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
+                        <Link href="/cookies" className="hover:text-white transition-colors">Cookies</Link>
                     </div>
                 </div>
             </div>
