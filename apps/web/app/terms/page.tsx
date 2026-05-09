@@ -8,7 +8,7 @@ import Footer from '../components/footer/footer';
 export default function TermsPage() {
     return (
         <div className="min-h-screen bg-white flex flex-col">
-            <nav className="border-b border-zinc-100 py-4 px-6 flex justify-between items-center">
+            <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-zinc-100 py-4 px-6 flex justify-between items-center">
                 <Link href="/landingPage">
                     <Logo />
                 </Link>
