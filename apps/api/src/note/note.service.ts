@@ -14,7 +14,7 @@ export class NoteService {
         private readonly configService: ConfigService
     ) {
         const apiKey = this.configService.get<string>('GROQ_API_KEY');
-        
+
         if (apiKey) {
             this.openai = new OpenAI({
                 apiKey: apiKey,
@@ -36,12 +36,11 @@ export class NoteService {
                     },
                 },
             });
-            
+
             if (!membership) {
                 throw new ForbiddenException('You are not a member of this workspace');
             }
 
-            // Viewers cannot create notes in a workspace
             if (membership.role === 'VIEWER') {
                 throw new ForbiddenException('Viewers cannot create notes in this workspace');
             }
@@ -119,7 +118,7 @@ export class NoteService {
 
             const content = response.choices[0].message.content;
             if (!content) throw new Error('No content returned from OpenAI');
-            
+
             const result = JSON.parse(content);
 
             await this.prisma.$transaction(async (tx) => {
@@ -206,12 +205,12 @@ export class NoteService {
     async delete(userId: string, id: string) {
         const note = await this.prisma.note.findUnique({
             where: { id },
-            include: { 
-                workspace: { 
-                    include: { 
-                        members: { where: { userId } } 
-                    } 
-                } 
+            include: {
+                workspace: {
+                    include: {
+                        members: { where: { userId } }
+                    }
+                }
             }
         });
 

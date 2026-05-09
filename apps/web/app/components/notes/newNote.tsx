@@ -45,7 +45,7 @@ export default function NewNote() {
   return (
     <div className="h-screen flex flex-col bg-white">
       <DashboardTopbar
-        logoText="MeetingMind"
+        logoText="MeetGenius"
         logoHref="/dashboard"
         workspaceName="My Workspace"
         ctaLabel="+ Note"
