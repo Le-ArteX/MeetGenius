@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DashboardTopbar from "../../components/dashboard/DashboardTopbar";
 import Logo from "../../components/logo/logo";
 import DashboardSidebar, { SidebarLink } from "../dashboard/DashboardSidebar";
+import { apiRequest } from "../../lib/api";
 
 const sidebarLinks: SidebarLink[] = [
     { id: "notes", label: "Notes", href: "/dashboard", icon: "notes" },
@@ -108,6 +109,23 @@ export default function WorkspacesPage() {
     const [inviteEmail, setInviteEmail] = useState("");
     const [inviteRole, setInviteRole] = useState<"Viewer" | "Editor">("Viewer");
     const [isCreateOpen, setIsCreateOpen] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [user, setUser] = useState<any>(null);
+
+    useEffect(() => {
+        /*
+        async function fetchProfile() {
+            try {
+                const userData = await apiRequest("/users/profile");
+                setUser(userData);
+            } catch (err) {
+                console.error("Failed to fetch user profile:", err);
+            }
+        }
+        fetchProfile();
+        */
+        setUser({ name: "Mursalin Leon", email: "mursalinleon2295@gmail.com" });
+    }, []);
 
     const handleCreateWorkspace = () => {
         if (!newWorkspaceName.trim()) return;
@@ -130,12 +148,19 @@ export default function WorkspacesPage() {
                 logoText="MeetGenius"
                 logoHref="/dashboard"
                 logo={<Logo />}
+                onMenuClick={() => setIsSidebarOpen(true)}
             />
 
             <div className="flex flex-1 min-h-0">
-                <DashboardSidebar links={sidebarLinks} activeLinkId="workspaces" />
+                <DashboardSidebar 
+                    links={sidebarLinks} 
+                    activeLinkId="workspaces" 
+                    user={user} 
+                    isOpen={isSidebarOpen}
+                    onClose={() => setIsSidebarOpen(false)}
+                />
 
-                <main className="flex-1 overflow-y-auto px-6 py-8 bg-zinc-50/30">
+                <main className="flex-1 overflow-y-auto px-4 md:px-6 py-8 bg-zinc-50/30">
                     <div className="w-full">
                         {/* Page Title */}
                         <h1 className="text-3xl font-bold text-zinc-900 mb-8">Workspaces</h1>

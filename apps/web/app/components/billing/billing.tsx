@@ -16,21 +16,32 @@ const sidebarLinks: SidebarLink[] = [
 
 export default function BillingPage() {
   const [subscription, setSubscription] = useState<any>(null);
+  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [upgrading, setUpgrading] = useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
-    async function fetchSub() {
+    /*
+    async function fetchData() {
       try {
-        const sub = await apiRequest("/bill/subscription");
+        const [sub, userData] = await Promise.all([
+          apiRequest("/bill/subscription"),
+          apiRequest("/users/profile")
+        ]);
         setSubscription(sub);
+        setUser(userData);
       } catch (err) {
-        console.error("Failed to fetch subscription:", err);
+        console.error("Failed to fetch billing data:", err);
       } finally {
         setLoading(false);
       }
     }
-    fetchSub();
+    fetchData();
+    */
+    setUser({ name: "Mursalin Leon", email: "mursalinleon2295@gmail.com" });
+    setSubscription({ plan: "FREE" });
+    setLoading(false);
   }, []);
 
   const handleUpgrade = async (plan: string) => {
@@ -57,12 +68,19 @@ export default function BillingPage() {
         logoHref="/dashboard"
         ctaLabel="Upgrade"
         logo={<Logo />}
+        onMenuClick={() => setIsSidebarOpen(true)}
       />
 
       <div className="flex flex-1 min-h-0">
-        <DashboardSidebar links={sidebarLinks} activeLinkId="billing" />
+        <DashboardSidebar 
+          links={sidebarLinks} 
+          activeLinkId="billing" 
+          user={user} 
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+        />
 
-        <main className="flex-1 overflow-y-auto pl-2 py-8 bg-white">
+        <main className="flex-1 overflow-y-auto px-4 md:pl-2 py-8 bg-white">
           <div className="w-full max-w-480 ml-auto px-6">
             <h1 className="text-3xl font-bold text-zinc-900 mb-8">Billing</h1>
 

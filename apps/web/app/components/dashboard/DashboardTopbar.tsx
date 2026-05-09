@@ -14,6 +14,7 @@ export interface DashboardTopbarProps {
   onCtaClick?: () => void;
   onSearch?: (value: string) => void;
   logo?: React.ReactNode;
+  onMenuClick?: () => void;
 }
 
 
@@ -29,8 +30,23 @@ export default function DashboardTopbar(props: DashboardTopbarProps) {
   ) : null;
 
   return (
-    <header className="flex items-center justify-between px-6 border-b border-zinc-200 bg-white h-16 shrink-0">
-      <div className="flex items-center gap-8 flex-1">
+    <header className="flex items-center justify-between px-6 border-b border-zinc-200 bg-white h-16 shrink-0 relative z-30">
+      <div className="flex items-center gap-4 md:gap-8 flex-1">
+        {/* Mobile Menu Button */}
+        <button 
+          onClick={() => {
+            console.log("Hamburger clicked!");
+            console.log("Menu button clicked");
+            props.onMenuClick?.();
+          }}
+          className="p-2 -ml-2 text-zinc-500 hover:text-zinc-900 md:hidden cursor-pointer flex items-center justify-center active:bg-zinc-100 rounded-lg"
+          aria-label="Toggle Menu"
+        >
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+
         <Link href={props.logoHref} className="text-lg font-bold text-zinc-900 tracking-tight shrink-0">
           {props.logoText}
         </Link>
@@ -64,7 +80,7 @@ export default function DashboardTopbar(props: DashboardTopbarProps) {
           ctaButton
         )}
         <div
-          className="w-8 h-8 rounded-full bg-zinc-900 text-white flex items-center justify-center text-sm font-semibold shrink-0 cursor-pointer"
+          className="w-8 h-8 rounded-full bg-zinc-900 text-white flex items-center justify-center text-sm font-semibold shrink-0 cursor-pointer hidden sm:flex"
           onClick={() => { router.push(props.logoHref); }} >
           {props.logo}
         </div>

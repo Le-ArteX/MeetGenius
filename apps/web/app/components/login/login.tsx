@@ -2,15 +2,25 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Logo from '../logo/logo';
+import { apiRequest } from '../../lib/api';
 
 export default function Login() {
+    const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // console.log('Logging in with:', { email, password });
+        setLoading(true);
+
+        // Simple redirection for now
+        setTimeout(() => {
+            router.push("/dashboard");
+        }, 500);
     };
 
     return (
@@ -29,6 +39,12 @@ export default function Login() {
 
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-6">
+                    {error && (
+                        <div className="p-3 rounded-xl bg-red-50 text-red-600 text-sm font-medium border border-red-100 animate-shake">
+                            {error}
+                        </div>
+                    )}
+                    
                     <div className="space-y-2">
                         <label className="text-sm font-bold text-zinc-900 ml-1" htmlFor="email">
                             Email
@@ -40,7 +56,8 @@ export default function Login() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
-                            className="w-full px-4 py-3 rounded-xl border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-zinc-50/50"
+                            disabled={loading}
+                            className="w-full px-4 py-3 rounded-xl border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-zinc-50/50 disabled:opacity-50"
                         />
                     </div>
 
@@ -56,10 +73,11 @@ export default function Login() {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
-                            className="w-full px-4 py-3 rounded-xl border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-zinc-50/50 mb-2"
+                            disabled={loading}
+                            className="w-full px-4 py-3 rounded-xl border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-zinc-50/50 mb-2 disabled:opacity-50"
                         />
                         <div className="flex justify-end">
-                            <Link href="/forgot-password" className="space-y-6 py-3 text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors">
+                            <Link href="/forgot-password" disabled={loading} className="space-y-6 py-3 text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors">
                                 Forgot Password?
                             </Link>
                         </div>
@@ -67,8 +85,9 @@ export default function Login() {
 
                     <button
                         type="submit"
-                        className="space-y-6 w-full mt-2 py-3 bg-zinc-900 text-white font-bold rounded-xl hover:bg-zinc-800 transition-colors shadow-lg shadow-zinc-900/10 active:scale-[0.98] cursor-pointer">
-                        Sign in
+                        disabled={loading}
+                        className="space-y-6 w-full mt-2 py-3 bg-zinc-900 text-white font-bold rounded-xl hover:bg-zinc-800 transition-colors shadow-lg shadow-zinc-900/10 active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+                        {loading ? "Signing in..." : "Sign in"}
                     </button>
                 </form>
 

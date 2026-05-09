@@ -21,9 +21,11 @@ export default function Settings() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    /*
     async function fetchProfile() {
       try {
         setError(null);
@@ -37,6 +39,11 @@ export default function Settings() {
       }
     }
     fetchProfile();
+    */
+    // Default placeholder data for UI testing
+    setUser({ name: "Mursalin Leon", email: "mursalinleon2295@gmail.com" });
+    setName("Mursalin Leon");
+    setEmail("mursalinleon2295@gmail.com");
   }, []);
 
   const handleRetry = () => {
@@ -131,11 +138,18 @@ export default function Settings() {
         logoText="MeetGenius"
         logoHref="/dashboard"
         logo={<Logo />}
+        onMenuClick={() => setIsSidebarOpen(true)}
       />
 
       <div className="flex flex-1 min-h-0">
-        <DashboardSidebar links={sidebarLinks} activeLinkId="settings" />
-        <main className="flex-1 overflow-y-auto px-12 py-10 bg-zinc-50/10">
+        <DashboardSidebar 
+          links={sidebarLinks} 
+          activeLinkId="settings" 
+          user={user} 
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+        />
+        <main className="flex-1 overflow-y-auto px-6 md:px-12 py-8 md:py-10 bg-zinc-50/10">
           <div className="max-w-5xl mx-auto">
             <div className="mb-10">
               <h1 className="text-3xl font-bold text-zinc-900 tracking-tight">Settings</h1>
