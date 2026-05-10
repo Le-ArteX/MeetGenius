@@ -62,7 +62,7 @@ export class AuthService {
             userId: user.id,
             code: otp,
             type: 'REGISTER',
-            expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
+            expiresAt: new Date(Date.now() + 1 * 60 * 1000), // 1 minute
         }
     });
 
@@ -154,7 +154,7 @@ export class AuthService {
           userId: user.id,
           code: otp,
           type: 'RESET',
-          expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
+          expiresAt: new Date(Date.now() + 1 * 60 * 1000), // 1 minute
         },
       });
 
@@ -170,6 +170,8 @@ export class AuthService {
     if (dto.password !== dto.confirmPassword) {
       throw new BadRequestException('Passwords do not match');
     }
+
+    console.log(`[DEBUG] Reset Password Attempt: email=${dto.email}, code=${dto.code}`);
 
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
@@ -190,6 +192,13 @@ export class AuthService {
     });
 
     if (!otpRecord) {
+      console.log(`[DEBUG] OTP Verification failed at: ${new Date().toISOString()}`);
+      console.log(`[DEBUG] OTP Record not found, used, or expired for user ${user.id}`);
+      const lastCode = await this.prisma.otpCode.findFirst({ 
+        where: { userId: user.id },
+        orderBy: { createdAt: 'desc' }
+      });
+      console.log(`[DEBUG] Latest code in DB for this user:`, lastCode);
       throw new BadRequestException('Invalid or expired OTP');
     }
 
