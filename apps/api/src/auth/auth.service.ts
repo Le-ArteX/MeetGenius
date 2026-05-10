@@ -62,7 +62,7 @@ export class AuthService {
             userId: user.id,
             code: otp,
             type: 'REGISTER',
-            expiresAt: new Date(Date.now() + 1 * 60 * 1000), // 1 minute
+            expiresAt: new Date(Date.now() + 2 * 60 * 1000), // 2 minutes
         }
     });
 
@@ -154,7 +154,7 @@ export class AuthService {
           userId: user.id,
           code: otp,
           type: 'RESET',
-          expiresAt: new Date(Date.now() + 1 * 60 * 1000), // 1 minute
+          expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes
         },
       });
 

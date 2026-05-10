@@ -59,8 +59,8 @@ export class MailService {
       : 'Reset your password';
 
     const subtext = type === 'REGISTER'
-      ? 'Enter the code below to complete your registration. It expires in 10 minutes.'
-      : 'Enter the code below to reset your password. It expires in 10 minutes.';
+      ? 'Enter the code below to complete your registration. It expires in 2 minutes.'
+      : 'Enter the code below to reset your password. It expires in 5 minutes.';
 
     if (!this.apiKey) {
       this.logger.log(`[MOCK OTP] To: ${to} | Code: ${code} | Type: ${type}`);
