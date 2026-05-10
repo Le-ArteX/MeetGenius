@@ -26,20 +26,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if token exists in localStorage on initial load
+    // Check if the cookie session is valid on initial load
     const verifySession = async () => {
-      const token = localStorage.getItem("accessToken");
-      if (token) {
-        try {
-          // If we have a token, fetch the user's latest profile to ensure token is valid
-          const response = await apiRequest<{ id: string; email: string; role: string; plan: string; isVerified: boolean; avatarUrl?: string | null }>('/users/profile');
-          setUser(response);
-        } catch (error) {
-          console.error("Session invalid or expired", error);
-          // Token is invalid or expired, clean up
-          localStorage.removeItem("accessToken");
-          setUser(null);
-        }
+      try {
+        // Axios will automatically send the access_token cookie
+        const response = await apiRequest<{ id: string; email: string; role: string; plan: string; isVerified: boolean; avatarUrl?: string | null }>('/users/profile');
+        setUser(response);
+      } catch (error) {
+        console.warn("Session invalid or expired", error);
+        setUser(null);
       }
       setIsLoading(false);
     };
@@ -48,12 +43,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = (token: string, userData: User) => {
-    localStorage.setItem("accessToken", token);
+    // We no longer need to save the token in localStorage since it's now a secure HTTP-Only Cookie!
     setUser(userData);
   };
 
-  const logout = () => {
-    localStorage.removeItem("accessToken");
+  const logout = async () => {
+    try {
+      await apiRequest('/auth/logout', { method: 'POST' });
+    } catch (e) {
+      console.error("Logout failed", e);
+    }
     setUser(null);
     window.location.href = "/login";
   };

@@ -5,6 +5,7 @@ export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost
 const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 5000, // 5 seconds timeout
+  withCredentials: true, // This ensures cookies are sent with requests
   headers: {
     "Content-Type": "application/json",
   },
