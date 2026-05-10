@@ -2,12 +2,13 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Logo from '../logo/logo';
 import { apiRequest } from '../../lib/api';
 
 export default function ForgotPassword() {
+    const router = useRouter();
     const [email, setEmail] = useState('');
-    const [submitted, setSubmitted] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -21,7 +22,8 @@ export default function ForgotPassword() {
                 method: 'POST',
                 body: JSON.stringify({ email }),
             });
-            setSubmitted(true);
+
+            router.push(`/reset-password?email=${encodeURIComponent(email)}`);
         } catch (err: any) {
             setError(err.message || 'Something went wrong. Please try again.');
         } finally {
@@ -40,60 +42,41 @@ export default function ForgotPassword() {
                     <div className="space-y-1">
                         <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">Reset Password</h1>
                         <p className="text-zinc-500 text-sm">
-                            {submitted
-                                ? 'Check your email for a reset link'
-                                : 'Enter your email to receive a password reset link'}
+                            Enter your email to receive a 6-digit OTP to reset your password
                         </p>
                     </div>
                 </div>
 
-                {!submitted ? (
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        {error && (
-                            <div className="p-3 rounded-xl bg-red-50 text-red-600 text-sm font-medium border border-red-100">
-                                {error}
-                            </div>
-                        )}
-
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-zinc-900 ml-1" htmlFor="email">
-                                Email Address
-                            </label>
-                            <input
-                                id="email"
-                                type="email"
-                                placeholder="you@example.com"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                                disabled={loading}
-                                className="w-full px-4 py-3 rounded-xl border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-zinc-50/50 disabled:opacity-50"
-                            />
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    {error && (
+                        <div className="p-3 rounded-xl bg-red-50 text-red-600 text-sm font-medium border border-red-100">
+                            {error}
                         </div>
+                    )}
 
-                        <button
-                            type="submit"
+                    <div className="space-y-2">
+                        <label className="text-sm font-bold text-zinc-900 ml-1" htmlFor="email">
+                            Email Address
+                        </label>
+                        <input
+                            id="email"
+                            type="email"
+                            placeholder="you@example.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
                             disabled={loading}
-                            className="w-full py-3 bg-zinc-900 text-white font-bold rounded-xl hover:bg-zinc-800 transition-colors shadow-lg shadow-zinc-900/10 active:scale-[0.98] cursor-pointer disabled:opacity-50">
-                            {loading ? 'Sending...' : 'Send Reset Link'}
-                        </button>
-                    </form>
-                ) : (
-                    <div className="bg-zinc-50 rounded-2xl p-6 text-center border border-zinc-100 space-y-3">
-                        {/* Success icon */}
-                        <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-                            <svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0L9.75 14.5" />
-                            </svg>
-                        </div>
-                        <p className="text-sm text-zinc-600 leading-relaxed">
-                            We've sent a password reset link to{' '}
-                            <span className="font-bold text-zinc-900">{email}</span>.
-                            Please check your inbox and spam folder.
-                        </p>
-                        <p className="text-xs text-zinc-400">The link expires in 1 hour.</p>
+                            className="w-full px-4 py-3 rounded-xl border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all bg-zinc-50/50 disabled:opacity-50"
+                        />
                     </div>
-                )}
+
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full py-3 bg-zinc-900 text-white font-bold rounded-xl hover:bg-zinc-800 transition-colors shadow-lg shadow-zinc-900/10 active:scale-[0.98] cursor-pointer disabled:opacity-50">
+                        {loading ? 'Sending OTP...' : 'Send Reset OTP'}
+                    </button>
+                </form>
 
                 {/* Footer */}
                 <div className="text-center pt-2">

@@ -8,10 +8,10 @@ import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ResetPasswordOtpDto } from './dto/reset-password.dto';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
 import { MailService } from '../mail/mail.service';
 import * as bcrypt from 'bcrypt';
-import * as crypto from 'crypto';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
@@ -28,12 +28,85 @@ export class AuthService {
     }
 
     const hashedPassword = await bcrypt.hash(dto.password, 10);
-    const user = await this.prisma.user.create({
-      data: {
-        email: dto.email,
-        password: hashedPassword,
+    
+    // Check if user already exists
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
+
+    let user;
+    if (existingUser) {
+        if (existingUser.isVerified) {
+            throw new BadRequestException('User already exists and is verified');
+        }
+        // Update unverified user with new password if they try to register again
+        user = await this.prisma.user.update({
+            where: { id: existingUser.id },
+            data: { password: hashedPassword }
+        });
+    } else {
+        user = await this.prisma.user.create({
+            data: {
+                email: dto.email,
+                password: hashedPassword,
+                isVerified: false,
+            },
+        });
+    }
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    await this.prisma.otpCode.create({
+        data: {
+            userId: user.id,
+            code: otp,
+            type: 'REGISTER',
+            expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
+        }
+    });
+
+    await this.mailService.sendOtpEmail(user.email, otp, 'REGISTER');
+
+    return {
+      message: 'OTP sent to your email for verification',
+      email: user.email,
+    };
+  }
+
+  async verifyRegisterOtp(dto: VerifyOtpDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const otpRecord = await this.prisma.otpCode.findFirst({
+      where: {
+        userId: user.id,
+        code: dto.code,
+        type: 'REGISTER',
+        used: false,
+        expiresAt: { gt: new Date() },
       },
     });
+
+    if (!otpRecord) {
+      throw new BadRequestException('Invalid or expired OTP');
+    }
+
+    await this.prisma.$transaction([
+        this.prisma.otpCode.update({
+            where: { id: otpRecord.id },
+            data: { used: true },
+        }),
+        this.prisma.user.update({
+            where: { id: user.id },
+            data: { isVerified: true },
+        }),
+    ]);
 
     const token = await this.generateToken(user.id, user.email);
     return {
@@ -46,9 +119,15 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
+    
     if (!user) {
       throw new UnauthorizedException('Incorrect email or password');
     }
+
+    if (!user.isVerified) {
+        throw new UnauthorizedException('Please verify your email before logging in');
+    }
+
     const isPasswordValid = await bcrypt.compare(dto.password, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Incorrect email or password');
@@ -61,85 +140,68 @@ export class AuthService {
     };
   }
 
-  /**
-   * Step 1: user requests a reset link.
-   * We always return a generic success message even if the email is unknown
-   * to prevent user enumeration attacks.
-   */
   async forgotPassword(dto: ForgotPasswordDto) {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
 
     if (user) {
-      // Invalidate any existing tokens for this user first
-      await this.prisma.passwordResetToken.updateMany({
-        where: { userId: user.id, used: false },
-        data: { used: true },
-      });
+      // Generate 6-digit OTP
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-      // Generate a secure random token
-      const rawToken = crypto.randomBytes(32).toString('hex');
-      const hashedToken = crypto
-        .createHash('sha256')
-        .update(rawToken)
-        .digest('hex');
-
-      await this.prisma.passwordResetToken.create({
+      await this.prisma.otpCode.create({
         data: {
           userId: user.id,
-          token: hashedToken,
-          expiresAt: new Date(Date.now() + 60 * 60 * 1000), // 1 hour
+          code: otp,
+          type: 'RESET',
+          expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
         },
       });
 
-      // Send the raw token in the email link (we hash it before storing)
-      await this.mailService.sendPasswordResetEmail(user.email, rawToken);
+      await this.mailService.sendOtpEmail(user.email, otp, 'RESET');
     }
 
     return {
-      message:
-        'If an account with that email exists, a password reset link has been sent.',
+      message: 'If an account with that email exists, an OTP has been sent.',
     };
   }
 
-  /**
-   * Step 2: user submits the new password with the token from the email link.
-   */
-  async resetPassword(dto: ResetPasswordDto) {
+  async resetPassword(dto: ResetPasswordOtpDto) {
     if (dto.password !== dto.confirmPassword) {
       throw new BadRequestException('Passwords do not match');
     }
 
-    // Hash the incoming token to compare against stored hash
-    const hashedToken = crypto
-      .createHash('sha256')
-      .update(dto.token)
-      .digest('hex');
-
-    const resetRecord = await this.prisma.passwordResetToken.findUnique({
-      where: { token: hashedToken },
+    const user = await this.prisma.user.findUnique({
+      where: { email: dto.email },
     });
 
-    if (
-      !resetRecord ||
-      resetRecord.used ||
-      resetRecord.expiresAt < new Date()
-    ) {
-      throw new BadRequestException(
-        'This reset link is invalid or has expired. Please request a new one.',
-      );
+    if (!user) {
+      throw new BadRequestException('Invalid request');
     }
 
-    // Mark token as used and update the password atomically
+    const otpRecord = await this.prisma.otpCode.findFirst({
+      where: {
+        userId: user.id,
+        code: dto.code,
+        type: 'RESET',
+        used: false,
+        expiresAt: { gt: new Date() },
+      },
+    });
+
+    if (!otpRecord) {
+      throw new BadRequestException('Invalid or expired OTP');
+    }
+
     const hashedPassword = await bcrypt.hash(dto.password, 10);
+    
     await this.prisma.$transaction([
-      this.prisma.passwordResetToken.update({
-        where: { id: resetRecord.id },
+      this.prisma.otpCode.update({
+        where: { id: otpRecord.id },
         data: { used: true },
       }),
       this.prisma.user.update({
-        where: { id: resetRecord.userId },
+        where: { id: user.id },
         data: { password: hashedPassword },
       }),
     ]);

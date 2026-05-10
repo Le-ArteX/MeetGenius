@@ -4,7 +4,6 @@ import { EmailUnique } from '../../users/validation/email-unique.validator';
 export class RegisterDto {
   @IsEmail({}, { message: 'Please enter a valid email address' })
   @IsNotEmpty({ message: 'Email is required' })
-  @Validate(EmailUnique, { message: 'Email already exists' })
   email: string;
 
   @IsString()
