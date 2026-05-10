@@ -26,7 +26,8 @@ model User {
   workspaceMembers WorkspaceMember[]
   notes            Note[]
   sentInvitations  Invitation[]
-  subscription     Subscription?
+  subscription         Subscription?
+  passwordResetTokens  PasswordResetToken[]
 }
 
 model Meeting {
@@ -149,4 +150,14 @@ enum SubStatus {
   ACTIVE
   INACTIVE
   CANCELLED
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
 }
