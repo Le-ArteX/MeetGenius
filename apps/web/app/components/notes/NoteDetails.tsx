@@ -7,6 +7,8 @@ import DashboardSidebar, { SidebarLink } from "../dashboard/DashboardSidebar";
 import Logo from "../logo/logo";
 import { apiRequest } from "../../lib/api";
 
+import { useAuth } from "../../context/AuthContext";
+
 const sidebarLinks: SidebarLink[] = [
   { id: "notes", label: "Notes", href: "/dashboard", icon: "notes" },
   { id: "workspaces", label: "Workspaces", href: "/dashboard/workspaces", icon: "workspaces" },
@@ -17,25 +19,49 @@ const sidebarLinks: SidebarLink[] = [
 export default function NoteDetails() {
   const { id } = useParams();
   const router = useRouter();
+  const { user } = useAuth();
+  
+  const [note, setNote] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Mock data for UI demonstration
-  const note = {
-    id: id,
-    title: "Project Strategy Meeting",
-    createdAt: new Date().toISOString(),
-    wordCount: 1240,
-    summary: "The team discussed the upcoming Q3 product launch. Key priorities include finalizing the mobile app redesign and starting the beta testing phase with selected customers. We also reviewed the marketing budget and decided to increase spend on social media ads by 15%.",
-    keyDecision: "1. Increase marketing budget by 15%.\n2. Beta launch scheduled for August 15th.\n3. Mobile redesign finalized.",
-    actionItems: [
-      { id: "1", text: "Finalize mobile mockups", assignee: "Sarah", done: true },
-      { id: "2", text: "Draft beta invitation email", assignee: "John", done: false },
-      { id: "3", text: "Book social media ad spots", assignee: "Alex", done: false }
-    ],
-    transcript: "[00:00] John: Hello everyone, let's start the strategy meeting...\n[01:30] Sarah: The mobile redesign is looking great, just a few more tweaks.\n[05:00] Alex: We need more budget for the Q3 ads.\n[10:00] John: Okay, let's approve a 15% increase.",
-    workspace: {
-      name: "Engineering Team"
+  useEffect(() => {
+    const fetchNote = async () => {
+      try {
+        const data = await apiRequest(`/notes/${id}`);
+        setNote(data);
+      } catch (err: any) {
+        setError("Failed to load note details");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchNote();
     }
-  };
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-zinc-50">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-900"></div>
+      </div>
+    );
+  }
+
+  if (error || !note) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-zinc-50 flex-col space-y-4">
+        <h2 className="text-xl font-bold text-zinc-900">{error || "Note not found"}</h2>
+        <button onClick={() => router.push("/dashboard")} className="text-blue-600 hover:underline">
+          Return to Dashboard
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen flex flex-col bg-white">
@@ -46,10 +72,17 @@ export default function NoteDetails() {
         ctaLabel="+ Note"
         ctaHref="/dashboard/new"
         logo={<Logo />}
+        onMenuClick={() => setIsSidebarOpen(true)}
       />
 
       <div className="flex flex-1 min-h-0">
-        <DashboardSidebar links={sidebarLinks} activeLinkId="notes" />
+        <DashboardSidebar 
+          links={sidebarLinks} 
+          activeLinkId="notes" 
+          user={user ? { name: user.email.split('@')[0] || "User", email: user.email, avaterUrl: user.avatarUrl || undefined } : undefined}
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+        />
         <main className="flex-1 overflow-y-auto px-6 md:px-12 py-10 bg-zinc-50/10">
           <div className="max-w-5xl mx-auto space-y-10">
             {/* Header Section */}

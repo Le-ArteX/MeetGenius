@@ -8,6 +8,8 @@ import DashboardSidebar, { SidebarLink } from "./DashboardSidebar";
 import NoteCard, { NoteCardProps } from "./noteCard";
 import { apiRequest } from "../../lib/api";
 
+import { useAuth } from "../../context/AuthContext";
+
 const sidebarLinks: SidebarLink[] = [
   { id: "notes", label: "Notes", href: "/dashboard", icon: "notes" },
   { id: "workspaces", label: "Workspaces", href: "/dashboard/workspaces", icon: "workspaces" },
@@ -15,42 +17,36 @@ const sidebarLinks: SidebarLink[] = [
   { id: "settings", label: "Settings", href: "/dashboard/settings", icon: "settings" },
 ];
 
-const sampleNotes: NoteCardProps[] = [
-  {
-    id: "1",
-    title: "Weekly Standup",
-    preview: "Discussed Q1 targets, sprint velocity......",
-    date: "Jan 12",
-    actionCount: 3,
-  },
-  {
-    id: "2",
-    title: "Client Call - Acme",
-    preview: "Client requested dashboard redesign......",
-    date: "Jan 10",
-    actionCount: 5,
-  },
-  {
-    id: "3",
-    title: "Design Review",
-    preview: "Approved new dashboard mockups......",
-    date: "Jan 8",
-    actionCount: 2,
-  },
-  {
-    id: "4",
-    title: "Sprint Planning",
-    preview: "Selected 14 story points for sprint......",
-    date: "Jan 6",
-    actionCount: 8,
-  },
-];
-
 export default function Dashboard() {
+  const { user } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [user, setUser] = useState<any>({ name: "Demo User", email: "demo@example.com" });
-  const [notes] = useState<NoteCardProps[]>(sampleNotes);
-  const [loading] = useState(false);
+  const [notes, setNotes] = useState<NoteCardProps[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchNotes = async () => {
+      try {
+        const response = await apiRequest<any[]>('/notes');
+        
+        // Map backend notes to NoteCardProps
+        const formattedNotes: NoteCardProps[] = response.map((n: any) => ({
+          id: n.id,
+          title: n.title,
+          preview: n.summary || n.transcript?.substring(0, 50) + "..." || "No content",
+          date: new Date(n.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          actionCount: n.actionItems?.length || 0,
+        }));
+        
+        setNotes(formattedNotes);
+      } catch (error) {
+        console.error("Failed to load notes", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNotes();
+  }, []);
 
   return (
     <div className="h-screen flex flex-col bg-white">
@@ -69,7 +65,7 @@ export default function Dashboard() {
         <DashboardSidebar
           links={sidebarLinks}
           activeLinkId="notes"
-          user={user}
+          user={user ? { name: user.email.split('@')[0] || "User", email: user.email, avaterUrl: user.avatarUrl || undefined } : undefined}
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
         />
