@@ -55,7 +55,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     localStorage.removeItem("accessToken");
     setUser(null);
-    // Optionally trigger a redirect to /login here
     window.location.href = "/login";
   };
 

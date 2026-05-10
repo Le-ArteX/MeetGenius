@@ -31,7 +31,7 @@ export async function apiRequest<T = any>(endpoint: string, options: any = {}): 
     console.log(`[API] Success ${endpoint}:`, response.data);
     return response.data;
   } catch (error: any) {
-    console.error(`[API] Error [${options.method || "GET"} ${endpoint}]:`, {
+    console.warn(`[API] Error [${options.method || "GET"} ${endpoint}]:`, {
       status: error.response?.status,
       data: error.response?.data,
       message: error.message

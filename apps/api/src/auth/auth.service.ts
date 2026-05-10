@@ -74,6 +74,36 @@ export class AuthService {
     };
   }
 
+  async resendOtp(dto: ForgotPasswordDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.isVerified) {
+      throw new BadRequestException('User is already verified');
+    }
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    await this.prisma.otpCode.create({
+      data: {
+        userId: user.id,
+        code: otp,
+        type: 'REGISTER',
+        expiresAt: new Date(Date.now() + 2 * 60 * 1000), // 2 minutes
+      },
+    });
+
+    await this.mailService.sendOtpEmail(user.email, otp, 'REGISTER');
+
+    return { message: 'A new OTP has been sent to your email.' };
+  }
+
   async verifyRegisterOtp(dto: VerifyOtpDto) {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },

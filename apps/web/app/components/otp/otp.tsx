@@ -73,11 +73,13 @@ function OTPVerificationContent() {
         setLoading(true);
         setError(null);
         try {
-            // We can reuse the register endpoint or a specific resend endpoint if available
-            // For now, let's just reset the timer
+            await apiRequest('/auth/resend-otp', {
+                method: 'POST',
+                body: JSON.stringify({ email }),
+            });
             setTimer(59);
         } catch (err: any) {
-            setError("Failed to resend code");
+            setError(err.message || "Failed to resend code");
         } finally {
             setLoading(false);
         }

@@ -7,7 +7,6 @@ import Logo from "../logo/logo";
 import DashboardSidebar, { SidebarLink } from "./DashboardSidebar";
 import NoteCard, { NoteCardProps } from "./noteCard";
 import { apiRequest } from "../../lib/api";
-
 import { useAuth } from "../../context/AuthContext";
 
 const sidebarLinks: SidebarLink[] = [
@@ -27,7 +26,7 @@ export default function Dashboard() {
     const fetchNotes = async () => {
       try {
         const response = await apiRequest<any[]>('/notes');
-        
+
         // Map backend notes to NoteCardProps
         const formattedNotes: NoteCardProps[] = response.map((n: any) => ({
           id: n.id,
@@ -36,7 +35,7 @@ export default function Dashboard() {
           date: new Date(n.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
           actionCount: n.actionItems?.length || 0,
         }));
-        
+
         setNotes(formattedNotes);
       } catch (error) {
         console.error("Failed to load notes", error);

@@ -20,6 +20,11 @@ export class AuthController {
     return this.authService.verifyRegisterOtp(dto);
   }
 
+  @Post('resend-otp')
+  async resendOtp(@Body() dto: ForgotPasswordDto) {
+    return this.authService.resendOtp(dto);
+  }
+
   @Post('login')
   async login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
