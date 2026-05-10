@@ -20,7 +20,12 @@ export class NoteController {
         let transcript = dto.transcript;
 
         if (file) {
-            transcript = await this.noteService.transcribeAudio(file);
+            const isAudio = file.mimetype.startsWith('audio/') || file.originalname.match(/\.(mp3|wav|m4a|mp4)$/i);
+            if (isAudio) {
+                transcript = await this.noteService.transcribeAudio(file);
+            } else {
+                transcript = await this.noteService.parseDocument(file);
+            }
         }
 
         if (!transcript && !dto.title) {

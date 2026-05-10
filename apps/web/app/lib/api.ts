@@ -26,7 +26,12 @@ export async function apiRequest<T = any>(endpoint: string, options: any = {}): 
     const response = await api({
       url: endpoint,
       method: options.method || "GET",
-      data: options.body ? JSON.parse(options.body) : undefined,
+      data: options.body instanceof FormData 
+        ? options.body 
+        : (options.body ? JSON.parse(options.body) : undefined),
+      headers: {
+        ...options.headers,
+      },
       ...options,
     });
     console.log(`[API] Success ${endpoint}:`, response.data);

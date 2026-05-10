@@ -81,6 +81,34 @@ export class NoteService {
         }
     }
 
+    async parseDocument(file: Express.Multer.File): Promise<string> {
+        const mimeType = file.mimetype;
+        const filename = file.originalname.toLowerCase();
+
+        try {
+            if (filename.endsWith('.pdf') || mimeType === 'application/pdf') {
+                const pdfParse = require('pdf-parse');
+                const data = await pdfParse(file.buffer);
+                return data.text;
+            }
+
+            if (filename.endsWith('.docx') || mimeType.includes('wordprocessingml')) {
+                const mammoth = require('mammoth');
+                const result = await mammoth.extractRawText({ buffer: file.buffer });
+                return result.value;
+            }
+
+            if (filename.endsWith('.txt') || mimeType === 'text/plain') {
+                return file.buffer.toString('utf-8');
+            }
+
+            throw new Error('Unsupported document format.');
+        } catch (error) {
+            this.logger.error(`Document parsing failed: ${error.message}`);
+            throw new Error('Failed to parse document. Please ensure it is a valid PDF, DOCX, or TXT file.');
+        }
+    }
+
     async processNote(noteId: string, transcript: string) {
         if (!this.openai) {
             this.logger.error('Cannot process note: AI is disabled');
