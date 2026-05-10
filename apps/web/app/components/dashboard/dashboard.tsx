@@ -83,7 +83,7 @@ export default function Dashboard() {
           ) : notes.length > 0 ? (
             <div className="flex flex-col gap-4 w-full">
               {notes.map((note) => (
-                <Link href="/dashboard/mynotes" key={note.id}>
+                <Link href={`/dashboard/${note.id}`} key={note.id}>
                   <NoteCard {...note} />
                 </Link>
               ))}

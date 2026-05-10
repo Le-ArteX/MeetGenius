@@ -97,20 +97,20 @@ export class AuthService {
       throw new BadRequestException('Invalid or expired OTP');
     }
 
-    await this.prisma.$transaction([
-        this.prisma.otpCode.update({
+    const updatedUser = await this.prisma.$transaction(async (tx) => {
+        await tx.otpCode.update({
             where: { id: otpRecord.id },
             data: { used: true },
-        }),
-        this.prisma.user.update({
+        });
+        return tx.user.update({
             where: { id: user.id },
             data: { isVerified: true },
-        }),
-    ]);
+        });
+    });
 
-    const token = await this.generateToken(user.id, user.email);
+    const token = await this.generateToken(updatedUser.id, updatedUser.email, updatedUser.role);
     return {
-      user,
+      user: updatedUser,
       access_token: token,
     };
   }
@@ -133,7 +133,7 @@ export class AuthService {
       throw new UnauthorizedException('Incorrect email or password');
     }
 
-    const token = await this.generateToken(user.id, user.email);
+    const token = await this.generateToken(user.id, user.email, user.role);
     return {
       user,
       access_token: token,
@@ -218,10 +218,11 @@ export class AuthService {
     return { message: 'Your password has been reset successfully.' };
   }
 
-  private async generateToken(userId: string, email: string) {
+  private async generateToken(userId: string, email: string, role: string) {
     return this.jwtService.signAsync({
       sub: userId,
       email,
+      role,
     });
   }
 }

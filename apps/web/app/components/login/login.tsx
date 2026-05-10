@@ -5,9 +5,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Logo from '../logo/logo';
 import { apiRequest } from '../../lib/api';
+import { useAuth } from '../../context/AuthContext';
 
 export default function Login() {
     const router = useRouter();
+    const { login } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
@@ -24,11 +26,20 @@ export default function Login() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
+        setError(null);
 
-        // Simple redirection for now
-        setTimeout(() => {
+        try {
+            const data = await apiRequest<{ access_token: string, user: any }>('/auth/login', {
+                method: 'POST',
+                body: JSON.stringify({ email, password })
+            });
+
+            login(data.access_token, data.user);
             router.push("/dashboard");
-        }, 500);
+        } catch (err: any) {
+            setError(err.message || "Failed to login. Please check your credentials.");
+            setLoading(false);
+        }
     };
 
     return (

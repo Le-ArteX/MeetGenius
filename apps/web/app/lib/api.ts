@@ -19,7 +19,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-export async function apiRequest(endpoint: string, options: any = {}) {
+export async function apiRequest<T = any>(endpoint: string, options: any = {}): Promise<T> {
   try {
     console.log(`[API] Starting ${options.method || "GET"} ${endpoint}...`);
     const response = await api({
