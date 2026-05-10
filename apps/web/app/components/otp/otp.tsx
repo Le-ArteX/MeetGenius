@@ -6,10 +6,13 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Logo from '../logo/logo';
 import { apiRequest } from '../../lib/api';
 
+import { useAuth } from '../../context/AuthContext';
+
 function OTPVerificationContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const email = searchParams.get('email') || '';
+    const { login } = useAuth();
 
     const [otp, setOtp] = useState(['', '', '', '', '', '']);
     const [loading, setLoading] = useState(false);
@@ -49,14 +52,14 @@ function OTPVerificationContent() {
         const code = otp.join('');
         
         try {
-            const response = await apiRequest('/auth/verify-otp', {
+            const response = await apiRequest<{ access_token: string, user: any }>('/auth/verify-otp', {
                 method: 'POST',
                 body: JSON.stringify({ email, code }),
             });
             
-            // Store token and redirect
+            // Store token using AuthContext and redirect
             if (response.access_token) {
-                localStorage.setItem('accessToken', response.access_token);
+                login(response.access_token, response.user);
                 router.push("/dashboard");
             }
         } catch (err: any) {
