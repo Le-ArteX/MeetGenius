@@ -35,12 +35,11 @@ export class UsersController {
             }),
         ) file: Express.Multer.File,
     ) {
-        // In a real app, you would upload this 'file' to Cloudinary/S3 here.
-        // For now, we'll return a mock URL to show it works.
+
         const mockUrl = `https://ui-avatars.com/api/?name=${userId}&background=random`;
-        
+
         await this.usersService.updateAvatar(userId, mockUrl);
-        
+
         return { avatarUrl: mockUrl };
     }
 }

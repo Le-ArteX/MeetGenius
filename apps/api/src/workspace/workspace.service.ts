@@ -73,31 +73,31 @@ export class WorkspaceService {
         });
     }
 
-    // --- Invitation System ---
+
 
     async invite(userId: string, workspaceId: string, dto: InviteUserDto) {
         const inviter = await this.prisma.user.findUnique({ where: { id: userId } });
         const workspace = await this.prisma.workspace.findUnique({ where: { id: workspaceId } });
-        
+
         if (!workspace) throw new NotFoundException('Workspace not found');
 
         await this.checkPermission(userId, workspaceId, ['OWNER', 'EDITOR']);
 
-        // Check if user is already a member
+
         const existingMember = await this.prisma.workspaceMember.findFirst({
-            where: { 
-                workspaceId, 
-                user: { email: dto.email } 
+            where: {
+                workspaceId,
+                user: { email: dto.email }
             }
         });
-        
+
         if (existingMember) {
             throw new BadRequestException('User is already a member of this workspace');
         }
 
         const token = crypto.randomBytes(32).toString('hex');
         const expiresAt = new Date();
-        expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiry
+        expiresAt.setDate(expiresAt.getDate() + 7);
 
         const invitation = await this.prisma.invitation.create({
             data: {
@@ -110,14 +110,14 @@ export class WorkspaceService {
             },
         });
 
-        // Send Real Email via Resend
+
         await this.mailService.sendInvitationEmail(
             dto.email,
             workspace.name,
             inviter?.email || 'A team member',
             token
         );
-        
+
         return { message: 'Invitation sent successfully', invitationId: invitation.id };
     }
 
@@ -132,7 +132,7 @@ export class WorkspaceService {
         if (invitation.expiresAt < new Date()) throw new BadRequestException('Invitation expired');
 
         return this.prisma.$transaction(async (tx) => {
-            // Check if user is already a member
+
             const existingMember = await tx.workspaceMember.findUnique({
                 where: { userId_workspaceId: { userId, workspaceId: invitation.workspaceId } }
             });
@@ -159,7 +159,7 @@ export class WorkspaceService {
         });
     }
 
-    // --- Member Management ---
+
 
     async getMembers(userId: string, workspaceId: string) {
         await this.checkPermission(userId, workspaceId, ['OWNER', 'EDITOR', 'VIEWER']);
@@ -171,7 +171,7 @@ export class WorkspaceService {
 
     async updateMemberRole(userId: string, workspaceId: string, targetUserId: string, role: 'OWNER' | 'EDITOR' | 'VIEWER') {
         await this.checkPermission(userId, workspaceId, ['OWNER']);
-        
+
         if (userId === targetUserId) throw new BadRequestException('You cannot change your own role');
 
         return this.prisma.workspaceMember.update({
@@ -182,19 +182,19 @@ export class WorkspaceService {
 
     async removeMember(userId: string, workspaceId: string, targetUserId: string) {
         const userMember = await this.checkPermission(userId, workspaceId, ['OWNER', 'EDITOR']);
-        
+
         const targetMember = await this.prisma.workspaceMember.findUnique({
             where: { userId_workspaceId: { userId: targetUserId, workspaceId } }
         });
 
         if (!targetMember) throw new NotFoundException('Member not found');
-        
-        // EDITORs can only remove themselves
+
+
         if (userMember.role === 'EDITOR' && userId !== targetUserId) {
             throw new ForbiddenException('Editors can only remove themselves');
         }
 
-        // OWNER cannot be removed by anyone (must transfer ownership or delete workspace)
+
         if (targetMember.role === 'OWNER') {
             throw new BadRequestException('Owner cannot be removed. Transfer ownership first.');
         }
@@ -204,7 +204,7 @@ export class WorkspaceService {
         });
     }
 
-    // Helper
+
     private async checkPermission(userId: string, workspaceId: string, allowedRoles: string[]) {
         const member = await this.prisma.workspaceMember.findUnique({
             where: { userId_workspaceId: { userId, workspaceId } }

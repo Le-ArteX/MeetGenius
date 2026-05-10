@@ -1,4 +1,4 @@
-import Dashboard from "../../../components/dashboard/dashboard";
+import NoteDetails from "../../../components/notes/NoteDetails";
 
 type props ={
     params: Promise<{id: string}>
@@ -7,6 +7,6 @@ type props ={
 export default async function Page({params}: props) {
     const {id} = await params;
     return (
-        <Dashboard />
+        <NoteDetails />
     )
 }

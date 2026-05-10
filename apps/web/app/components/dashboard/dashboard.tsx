@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import DashboardTopbar from "./DashboardTopbar";
 import Logo from "../logo/logo";
 import DashboardSidebar, { SidebarLink } from "./DashboardSidebar";
@@ -18,7 +19,7 @@ const sampleNotes: NoteCardProps[] = [
   {
     id: "1",
     title: "Weekly Standup",
-    preview: "Discussed Q1 targets, sprint velocity......Discussed Q1 targets, sprint velocity......Discussed Q1 targets, sprint velocity......Discussed Q1 targets, sprint velocity......Discussed Q1 targets, sprint velocity......Discussed Q1 targets, sprint velocity......Discussed Q1 targets, sprint velocity......Discussed Q1 targets, sprint velocity......Discussed Q1 targets, sprint velocity......Discussed Q1 targets, sprint velocity......Discussed Q1 targets, sprint velocity......Discussed Q1 targets, sprint velocity......",
+    preview: "Discussed Q1 targets, sprint velocity......",
     date: "Jan 12",
     actionCount: 3,
   },
@@ -47,21 +48,9 @@ const sampleNotes: NoteCardProps[] = [
 
 export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [user, setUser] = useState<any>(null);
-
-  useEffect(() => {
-    /* 
-    async function fetchProfile() {
-      try {
-        const userData = await apiRequest("/users/profile");
-        setUser(userData);
-      } catch (err) {
-        console.error("Failed to fetch user profile:", err);
-      }
-    }
-    fetchProfile();
-    */
-  }, []);
+  const [user, setUser] = useState<any>({ name: "Demo User", email: "demo@example.com" });
+  const [notes] = useState<NoteCardProps[]>(sampleNotes);
+  const [loading] = useState(false);
 
   return (
     <div className="h-screen flex flex-col bg-white">
@@ -77,20 +66,36 @@ export default function Dashboard() {
       />
 
       <div className="flex flex-1 min-h-0">
-        <DashboardSidebar 
-          links={sidebarLinks} 
-          activeLinkId="notes" 
-          user={user} 
+        <DashboardSidebar
+          links={sidebarLinks}
+          activeLinkId="notes"
+          user={user}
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
         />
         <main className="flex-1 overflow-y-auto px-4 md:px-6 py-8 bg-zinc-50/30">
           <h1 className="text-3xl font-bold text-zinc-900 mb-8">Notes</h1>
-          <div className="flex flex-col gap-4 w-full">
-            {sampleNotes.map((note) => (
-              <NoteCard key={note.id} {...note} />
-            ))}
-          </div>
+
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-900"></div>
+            </div>
+          ) : notes.length > 0 ? (
+            <div className="flex flex-col gap-4 w-full">
+              {notes.map((note) => (
+                <Link href="/dashboard/mynotes" key={note.id}>
+                  <NoteCard {...note} />
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-zinc-200">
+              <p className="text-zinc-500 mb-4">No notes found yet.</p>
+              <Link href="/dashboard/new" className="text-blue-600 font-semibold hover:underline">
+                Create your first note →
+              </Link>
+            </div>
+          )}
         </main>
       </div>
     </div>
