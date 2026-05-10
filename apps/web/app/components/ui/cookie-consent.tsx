@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 export default function CookieConsent() {
   const [show, setShow] = useState(false);
@@ -28,28 +29,31 @@ export default function CookieConsent() {
   if (!show) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 p-4 sm:p-6 md:max-w-3xl md:mx-auto">
-      <div className="bg-zinc-900 border border-zinc-800 shadow-2xl rounded-2xl p-6 text-white flex flex-col sm:flex-row gap-6 items-center justify-between animate-in slide-in-from-bottom-8 fade-in duration-700 ease-out">
-        <div className="space-y-1.5 flex-1">
-          <h3 className="font-bold text-lg flex items-center gap-2">
-            🍪 We value your privacy
+    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[100] w-[calc(100%-2rem)] sm:w-[380px]">
+      <div className="bg-[#0A0A0A] border border-white/[0.08] shadow-2xl rounded-xl p-5 text-zinc-100 flex flex-col gap-4 animate-in slide-in-from-bottom-8 fade-in duration-500 ease-out">
+        <div className="space-y-2">
+          <h3 className="font-semibold text-sm tracking-tight">
+            We use cookies
           </h3>
-          <p className="text-sm text-zinc-400 leading-relaxed">
-            MeetGenius uses essential cookies to securely maintain your session and keep you logged in. We do not use third-party tracking cookies.
+          <p className="text-[13px] text-zinc-400 leading-relaxed font-medium">
+            We use essential cookies to maintain your session securely. By continuing to use our platform, you agree to our use of cookies.
+            <Link href="/privacy" className="text-zinc-200 hover:text-white underline underline-offset-2 ml-1 transition-colors">
+              Read policy
+            </Link>.
           </p>
         </div>
-        <div className="flex gap-3 w-full sm:w-auto shrink-0">
+        <div className="flex gap-2 w-full pt-1">
           <button
             onClick={handleDecline}
-            className="flex-1 sm:flex-none px-5 py-2.5 rounded-xl font-medium text-sm text-zinc-300 hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer border border-transparent hover:border-zinc-700"
+            className="flex-1 px-4 py-2 rounded-lg font-semibold text-[13px] text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-all cursor-pointer"
           >
             Decline
           </button>
           <button
             onClick={handleAccept}
-            className="flex-1 sm:flex-none px-6 py-2.5 rounded-xl font-bold text-sm bg-white text-zinc-900 hover:bg-zinc-200 transition-all shadow-lg shadow-white/10 hover:shadow-white/20 active:scale-[0.97] cursor-pointer"
+            className="flex-1 px-4 py-2 rounded-lg font-semibold text-[13px] bg-white text-black hover:bg-zinc-200 active:scale-[0.98] transition-all cursor-pointer"
           >
-            Allow Cookies
+            Accept All
           </button>
         </div>
       </div>
