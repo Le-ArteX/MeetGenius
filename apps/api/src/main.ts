@@ -3,13 +3,14 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { useContainer } from 'class-validator';
-import * as cookieParser from 'cookie-parser';
+
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     rawBody: true, //webhooks signature verification required for stripe
   });
 
+  const cookieParser = require('cookie-parser');
   app.use(cookieParser());
 
   // This line allows class-validator to use NestJS dependency injection
