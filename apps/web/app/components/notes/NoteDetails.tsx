@@ -38,6 +38,7 @@ export default function NoteDetails() {
   const shareButtonRef = useRef<HTMLButtonElement>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Edit states
   const [editTitle, setEditTitle] = useState("");
@@ -308,7 +309,11 @@ export default function NoteDetails() {
         onConfirm={async () => {
           try {
             await apiRequest(`/notes/${note.id}`, { method: "DELETE" });
-            router.push("/dashboard");
+            setIsDeleteModalOpen(false);
+            setSuccessMessage("Note deleted successfully!");
+            setTimeout(() => {
+              router.push("/dashboard");
+            }, 1500);
           } catch (err) {
             console.error("Failed to delete note", err);
             alert("Failed to delete note. Please try again.");
@@ -317,6 +322,20 @@ export default function NoteDetails() {
         title="Delete Meeting Note"
         description={`Are you sure you want to delete "${note.title}"? This action is permanent and cannot be undone.`}
       />
+
+      {/* Success Message Toast */}
+      {successMessage && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[10003] animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <div className="bg-zinc-900 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-white/10">
+            <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+              <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <span className="text-sm font-bold tracking-tight">{successMessage}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
