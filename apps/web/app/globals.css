@@ -12,6 +12,10 @@
   @apply px-3 py-2 bg-white border border-zinc-200 rounded-lg text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/5 transition-all;
 }
 
+button {
+  cursor: pointer;
+}
+
 @media print {
   aside, nav, button, .no-print, [role="menu"], .absolute {
     display: none !important;

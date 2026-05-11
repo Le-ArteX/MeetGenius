@@ -1,13 +1,18 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
 import DashboardTopbar from "../dashboard/DashboardTopbar";
 import DashboardSidebar, { SidebarLink } from "../dashboard/DashboardSidebar";
 import Logo from "../logo/logo";
 import { apiRequest } from "../../lib/api";
 import DeleteModal from "../ui/DeleteModal";
-import ShareDropdown from "../ui/ShareModal";
+
+const ShareDropdown = dynamic(() => import("../ui/ShareModal"), { 
+  ssr: false,
+  loading: () => <button className="px-4 py-2 text-sm font-medium text-zinc-400">Share</button>
+});
 
 import { useAuth } from "../../context/AuthContext";
 
@@ -22,7 +27,7 @@ export default function NoteDetails() {
   const { id } = useParams();
   const router = useRouter();
   const { user } = useAuth();
-  
+
   const [note, setNote] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -94,9 +99,9 @@ export default function NoteDetails() {
       />
 
       <div className="flex flex-1 min-h-0">
-        <DashboardSidebar 
-          links={sidebarLinks} 
-          activeLinkId="notes" 
+        <DashboardSidebar
+          links={sidebarLinks}
+          activeLinkId="notes"
           user={user ? { name: user.email.split('@')[0] || "User", email: user.email, avatarUrl: user.avatarUrl || undefined } : undefined}
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
@@ -117,14 +122,14 @@ export default function NoteDetails() {
                 )}
                 <div className="flex items-center gap-3">
                   <div className="relative">
-                    <button 
+                    <button
                       ref={shareButtonRef}
                       onClick={() => setIsShareModalOpen(!isShareModalOpen)}
                       className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${isCopied ? 'bg-green-50 text-green-600' : 'text-zinc-600 hover:bg-zinc-100'}`}
                     >
                       {isCopied ? 'Copied!' : 'Share'}
                     </button>
-                    <ShareDropdown 
+                    <ShareDropdown
                       isOpen={isShareModalOpen}
                       onClose={() => setIsShareModalOpen(false)}
                       note={note}
@@ -136,9 +141,9 @@ export default function NoteDetails() {
                       }}
                     />
                   </div>
-                  
+
                   {isEditing ? (
-                    <button 
+                    <button
                       onClick={async () => {
                         setIsSaving(true);
                         try {
@@ -166,7 +171,7 @@ export default function NoteDetails() {
                       {isSaving ? "Saving..." : "Save Changes"}
                     </button>
                   ) : (
-                    <button 
+                    <button
                       onClick={() => setIsEditing(true)}
                       className="px-4 py-2 text-sm font-medium text-white bg-zinc-900 hover:bg-zinc-800 rounded-lg transition-colors"
                     >
@@ -175,7 +180,7 @@ export default function NoteDetails() {
                   )}
 
                   {!isEditing && (
-                    <button 
+                    <button
                       onClick={() => setIsDeleteModalOpen(true)}
                       className="px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-red-100"
                     >
@@ -297,7 +302,7 @@ export default function NoteDetails() {
           </div>
         </main>
       </div>
-      <DeleteModal 
+      <DeleteModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={async () => {
