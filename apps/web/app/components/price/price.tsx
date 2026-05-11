@@ -10,6 +10,7 @@ export interface PricePlanProps {
     onClick?: () => void;
     variant?: string;
     isPopular?: boolean;
+    isActive?: boolean;
 }
 
 export interface PriceProps {
@@ -27,13 +28,20 @@ export default function Price(props: PriceProps) {
                     {props.plans?.map((plan, i) => {
                         const isDark = plan.variant === "dark";
                         return (
-                            <div key={i} className={`p-8 rounded-[32px] border flex flex-col transition-all hover:scale-[1.01] relative ${isDark
+                            <div key={i} className={`p-8 rounded-[32px] border-2 flex flex-col transition-all hover:scale-[1.01] relative ${
+                                plan.isActive ? "ring-4 ring-emerald-500/10 border-emerald-500" : "border-zinc-100"
+                            } ${isDark
                                 ? "bg-zinc-900 border-zinc-800 text-white shadow-xl"
-                                : "bg-white border-zinc-100 text-zinc-900 shadow-sm"
+                                : "bg-white text-zinc-900 shadow-sm"
                                 }`}>
                                 {plan.isPopular && (
                                     <div className="absolute top-6 right-6 bg-[#3b82f6] text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter">
                                         Popular
+                                    </div>
+                                )}
+                                {plan.isActive && (
+                                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg shadow-emerald-500/20 z-10 border-2 border-white">
+                                        Active Plan
                                     </div>
                                 )}
 

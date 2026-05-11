@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, Param, Delete, UseGuards, Query, UseInterceptors, UploadedFile, BadRequestException, ForbiddenException } from "@nestjs/common";
+import { Controller, Get, Post, Patch, Body, Param, Delete, UseGuards, Query, UseInterceptors, UploadedFile, BadRequestException, ForbiddenException, Res, NotFoundException } from "@nestjs/common";
 import { NoteService } from "./note.service";
 import { CreateNoteDto } from "./dto/create-note.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
@@ -9,6 +9,11 @@ import { FileInterceptor } from "@nestjs/platform-express";
 @UseGuards(JwtAuthGuard)
 export class NoteController {
     constructor(private readonly noteService: NoteService) { }
+
+    @Get('usage')
+    async getUsage(@CurrentUser('id') userId: string) {
+        return this.noteService.getUsage(userId);
+    }
 
     @Post()
     @UseInterceptors(FileInterceptor('file'))
@@ -91,5 +96,40 @@ export class NoteController {
         @Param('id') id: string
     ) {
         return this.noteService.delete(userId, id);
+    }
+
+    @Get(':id/export')
+    async export(
+        @CurrentUser('id') userId: string,
+        @Param('id') id: string,
+        @Res() res: any
+    ) {
+        // --- ENFORCE PLAN LIMITS FOR EXPORT ---
+        const user = await this.noteService.getUserPlan(userId);
+        if (user?.plan === 'FREE') {
+            throw new ForbiddenException('PDF Export is a Pro feature. Please upgrade to Pro to download your notes.');
+        }
+        // --------------------------------------
+
+        const note = await this.noteService.findOne(userId, id);
+        if (!note) throw new NotFoundException('Note not found');
+
+        const content = `
+            MEETING NOTE: ${note.title}
+            DATE: ${note.createdAt.toLocaleDateString()}
+            
+            SUMMARY:
+            ${note.summary || 'No summary available.'}
+            
+            KEY DECISIONS:
+            ${note.keyDecision || 'No decisions recorded.'}
+            
+            TRANSCRIPT:
+            ${note.transcript || 'No transcript available.'}
+        `;
+
+        res.setHeader('Content-Type', 'text/plain');
+        res.setHeader('Content-Disposition', `attachment; filename="${note.title.replace(/\s+/g, '_')}.txt"`);
+        return res.send(content);
     }
 }

@@ -25,8 +25,8 @@ export class WorkspaceService {
                 where: { ownerId: userId }
             });
 
-            if (workspaceCount >= 1) {
-                throw new ForbiddenException('Free plan limit reached (1 workspace). Please upgrade to Pro to create more workspaces.');
+            if (workspaceCount >= 3) {
+                throw new ForbiddenException('Free plan limit reached (3 workspaces). Please upgrade to Pro to create more workspaces.');
             }
         }
         // ---------------------------

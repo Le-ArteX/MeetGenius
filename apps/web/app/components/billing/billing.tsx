@@ -16,15 +16,24 @@ const sidebarLinks: SidebarLink[] = [
 ];
 
 export default function BillingPage() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [subscription, setSubscription] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [upgrading, setUpgrading] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
+    if (authLoading) return;
+    
+    // If not loading and no user, we must redirect
+    if (!user) {
+      window.location.href = "/login";
+      return;
+    }
+
     async function fetchData() {
       try {
+        setLoading(true);
         const sub = await apiRequest("/bill/subscription");
         setSubscription(sub);
       } catch (err) {
@@ -34,7 +43,7 @@ export default function BillingPage() {
       }
     }
     fetchData();
-  }, []);
+  }, [authLoading, user]);
 
   const handleUpgrade = async (plan: string) => {
     try {
@@ -53,6 +62,12 @@ export default function BillingPage() {
 
   const currentPlan = subscription?.plan || "FREE";
   const sidebarUser = user ? { name: user.email.split("@")[0] || user.email, email: user.email, avatarUrl: user.avatarUrl || undefined } : undefined;
+
+  if (authLoading) return (
+    <div className="h-screen flex items-center justify-center bg-white">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-900"></div>
+    </div>
+  );
 
   return (
     <div className="h-screen flex flex-col bg-white">
@@ -93,6 +108,7 @@ export default function BillingPage() {
                     features: ["5 notes/month", "1 workspace"],
                     ctaLabel: currentPlan === "FREE" ? "Current Plan" : "Downgrade",
                     variant: "light",
+                    isActive: currentPlan === "FREE",
                   },
                   {
                     name: "Pro",
@@ -103,6 +119,7 @@ export default function BillingPage() {
                     onClick: currentPlan === "PRO" ? undefined : () => handleUpgrade("PRO"),
                     variant: "dark",
                     isPopular: true,
+                    isActive: currentPlan === "PRO",
                   },
                   {
                     name: "Enterprise",
@@ -112,6 +129,7 @@ export default function BillingPage() {
                     ctaLabel: upgrading === "ENTERPRISE" ? "Connecting..." : currentPlan === "ENTERPRISE" ? "Current Plan" : "Go Enterprise",
                     onClick: currentPlan === "ENTERPRISE" ? undefined : () => handleUpgrade("ENTERPRISE"),
                     variant: "dark",
+                    isActive: currentPlan === "ENTERPRISE",
                   },
                 ]}
               />

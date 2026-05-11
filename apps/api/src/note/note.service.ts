@@ -64,8 +64,10 @@ export class NoteService {
                 }
             });
 
-            if (noteCount >= 5) {
-                throw new ForbiddenException('Free plan limit reached (5 notes/month). Please upgrade to Pro for unlimited notes.');
+            const limit = user.plan === 'FREE' ? 5 : user.plan === 'PRO' ? 20 : Infinity;
+
+            if (noteCount >= limit) {
+                throw new ForbiddenException(`${user.plan} plan limit reached (${limit} notes/month). Please upgrade for more notes.`);
             }
         }
         // ---------------------------
@@ -269,11 +271,13 @@ export class NoteService {
             where = {
                 userId,
                 workspaceId: null,
+                deletedAt: null,
             };
         } else if (workspaceId) {
             // Filter by a specific workspace ID (ensure user is a member)
             where = {
                 workspaceId,
+                deletedAt: null,
                 workspace: {
                     members: {
                         some: { userId }
@@ -283,6 +287,7 @@ export class NoteService {
         } else {
             // No filter: Show ALL notes user has access to
             where = {
+                deletedAt: null,
                 OR: [
                     { userId },
                     {
@@ -327,6 +332,7 @@ export class NoteService {
         return this.prisma.note.findFirst({
             where: {
                 id,
+                deletedAt: null,
                 OR: [
                     { userId },
                     {
@@ -381,8 +387,9 @@ export class NoteService {
             throw new ForbiddenException('You do not have permission to delete this note');
         }
 
-        return this.prisma.note.delete({
+        return this.prisma.note.update({
             where: { id },
+            data: { deletedAt: new Date() }
         });
     }
 
@@ -391,5 +398,27 @@ export class NoteService {
             where: { id: userId },
             select: { plan: true }
         });
+    }
+
+    async getUsage(userId: string) {
+        const user = await this.getUserPlan(userId);
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setHours(0, 0, 0, 0);
+
+        const count = await this.prisma.note.count({
+            where: {
+                userId,
+                createdAt: { gte: startOfMonth }
+            }
+        });
+
+        const limit = user?.plan === 'FREE' ? 5 : user?.plan === 'PRO' ? 20 : 999999;
+
+        return {
+            count,
+            limit,
+            plan: user?.plan || 'FREE'
+        };
     }
 }

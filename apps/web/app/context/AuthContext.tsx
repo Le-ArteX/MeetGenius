@@ -26,17 +26,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if the cookie session is valid on initial load
     const verifySession = async () => {
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("Auth timeout")), 5000)
+      );
+
       try {
-        // Axios will automatically send the access_token cookie
-        const response = await apiRequest<{ id: string; email: string; role: string; plan: string; isVerified: boolean; avatarUrl?: string | null }>('/users/profile');
+        const response = await Promise.race([
+          apiRequest<{ id: string; email: string; role: string; plan: string; isVerified: boolean; avatarUrl?: string | null }>('/users/profile'),
+          timeoutPromise
+        ]) as User;
+        
         setUser(response);
       } catch (error) {
-        console.warn("Session invalid or expired", error);
+        console.warn("Session verification failed:", error);
         setUser(null);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     verifySession();

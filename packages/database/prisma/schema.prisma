@@ -89,6 +89,7 @@ model Note {
   emailDraft  String?
   wordCount   Int       @default(0)
   meetingDate DateTime?
+  deletedAt   DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
