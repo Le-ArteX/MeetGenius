@@ -31,8 +31,8 @@ export default function NewNote() {
   useEffect(() => {
     const fetchWorkspaces = async () => {
       try {
-        const data = await apiRequest<any[]>("/workspaces");
-        setWorkspaces(data);
+        const response = await apiRequest<{ data: any[], total: number }>("/workspaces");
+        setWorkspaces(response.data || []);
       } catch (err) {
         console.error("Failed to fetch workspaces", err);
       }
