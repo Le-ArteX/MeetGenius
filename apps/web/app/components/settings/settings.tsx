@@ -25,6 +25,7 @@ export default function Settings() {
   const [error, setError] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [pendingAvatar, setPendingAvatar] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -68,6 +69,20 @@ export default function Settings() {
     } finally {
       setSaving(false);
       setTimeout(() => setSaved(false), 3000);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      setSaving(true);
+      await apiRequest("/users/profile", { method: "DELETE" });
+      // Redirect to home/login after deletion
+      window.location.href = "/login";
+    } catch (err: any) {
+      setError(err.message || "Failed to delete account");
+      setShowDeleteConfirm(false);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -237,9 +252,34 @@ export default function Settings() {
               <div className="bg-white border border-red-100 rounded-2xl p-8 shadow-sm">
                 <h2 className="text-lg font-bold text-red-600 mb-2">Danger Zone</h2>
                 <p className="text-sm text-zinc-500 mb-6">Once you delete your account, there is no going back. Please be certain.</p>
-                <button className="bg-red-50 text-red-600 border border-red-200 px-6 py-3 rounded-xl font-bold text-sm hover:bg-red-100 transition-all cursor-pointer">
-                  Delete Account
-                </button>
+                
+                {showDeleteConfirm ? (
+                  <div className="bg-red-50 p-6 rounded-xl border border-red-100 animate-in fade-in zoom-in duration-300">
+                    <p className="text-sm font-bold text-red-700 mb-4">Are you absolutely sure? All your notes and workspaces will be permanently deleted.</p>
+                    <div className="flex items-center gap-3">
+                      <button 
+                        onClick={handleDeleteAccount}
+                        disabled={saving}
+                        className="bg-red-600 text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-red-700 transition-all cursor-pointer"
+                      >
+                        {saving ? "Deleting..." : "Yes, Delete Everything"}
+                      </button>
+                      <button 
+                        onClick={() => setShowDeleteConfirm(false)}
+                        className="bg-white text-zinc-600 border border-zinc-200 px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-zinc-50 transition-all cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="bg-red-50 text-red-600 border border-red-200 px-6 py-3 rounded-xl font-bold text-sm hover:bg-red-100 transition-all cursor-pointer"
+                  >
+                    Delete Account
+                  </button>
+                )}
               </div>
             </div>
           </div>

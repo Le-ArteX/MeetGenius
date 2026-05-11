@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Post, Body, UseGuards, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator } from "@nestjs/common";
+import { Controller, Get, Patch, Post, Delete, Body, UseGuards, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
@@ -42,5 +42,10 @@ export class UsersController {
         await this.usersService.updateAvatar(userId, dataUrl);
 
         return { avatarUrl: dataUrl };
+    }
+
+    @Delete('profile')
+    async deleteProfile(@CurrentUser('id') userId: string) {
+        return this.usersService.remove(userId);
     }
 }
