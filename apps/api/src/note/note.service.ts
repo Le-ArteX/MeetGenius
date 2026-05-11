@@ -87,25 +87,55 @@ export class NoteService {
 
         try {
             if (filename.endsWith('.pdf') || mimeType === 'application/pdf') {
-                const pdfParse = require('pdf-parse');
-                const data = await pdfParse(file.buffer);
-                return data.text;
+                // pdf-parse v2.x uses a class-based API: PDFParse
+                const { PDFParse } = require('pdf-parse');
+
+                const parser = new PDFParse({
+                    data: new Uint8Array(file.buffer),
+                    verbosity: 0,
+                    useWorkerFetch: false,
+                    isEvalSupported: false,
+                });
+
+                const result = await parser.getText();
+                const text = result.text?.trim() || '';
+
+                if (!text) {
+                    throw new Error('PDF extraction returned empty text.');
+                }
+
+                // Clean up pdfjs-dist resources
+                await parser.destroy().catch(() => {});
+
+                return text;
             }
 
             if (filename.endsWith('.docx') || mimeType.includes('wordprocessingml')) {
-                const mammoth = require('mammoth');
+                const mammothModule = require('mammoth');
+                const mammoth = mammothModule.extractRawText 
+                    ? mammothModule 
+                    : (mammothModule.default || mammothModule);
+
                 const result = await mammoth.extractRawText({ buffer: file.buffer });
+                
+                if (!result.value.trim()) {
+                    throw new Error('Word document extraction resulted in empty text.');
+                }
+                
                 return result.value;
             }
 
             if (filename.endsWith('.txt') || mimeType === 'text/plain') {
-                return file.buffer.toString('utf-8');
+                const text = file.buffer.toString('utf-8');
+                if (!text.trim()) throw new Error('Text file is empty.');
+                return text;
             }
 
             throw new Error('Unsupported document format.');
         } catch (error) {
-            this.logger.error(`Document parsing failed: ${error.message}`);
-            throw new Error('Failed to parse document. Please ensure it is a valid PDF, DOCX, or TXT file.');
+            this.logger.error(`Document parsing failed: ${error.message}\n${error.stack}`);
+            const { InternalServerErrorException } = require('@nestjs/common');
+            throw new InternalServerErrorException(`Failed to parse document. Reason: ${error.message}`);
         }
     }
 

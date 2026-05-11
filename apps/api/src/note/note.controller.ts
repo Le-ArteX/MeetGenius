@@ -20,7 +20,10 @@ export class NoteController {
         let transcript = dto.transcript;
 
         if (file) {
-            const isAudio = file.mimetype.startsWith('audio/') || file.originalname.match(/\.(mp3|wav|m4a|mp4)$/i);
+            const isAudio = file.mimetype.startsWith('audio/') || 
+                            file.mimetype === 'video/webm' || 
+                            file.originalname.match(/\.(mp3|wav|m4a|mp4|webm|ogg)$/i);
+            
             if (isAudio) {
                 transcript = await this.noteService.transcribeAudio(file);
             } else {
