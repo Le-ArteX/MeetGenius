@@ -20,13 +20,15 @@ export class WorkspaceService {
             select: { plan: true }
         });
 
-        if (user?.plan === 'FREE') {
+        const limit = user?.plan === 'FREE' ? 3 : user?.plan === 'PRO' ? 20 : Infinity;
+
+        if (user?.plan !== 'ENTERPRISE') {
             const workspaceCount = await this.prisma.workspace.count({
                 where: { ownerId: userId }
             });
 
-            if (workspaceCount >= 3) {
-                throw new ForbiddenException('Free plan limit reached (3 workspaces). Please upgrade to Pro to create more workspaces.');
+            if (workspaceCount >= limit) {
+                throw new ForbiddenException(`${user?.plan || 'FREE'} plan limit reached (${limit} workspaces). Please upgrade for more workspaces.`);
             }
         }
         // ---------------------------
