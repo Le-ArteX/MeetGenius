@@ -42,6 +42,10 @@ export class WorkspaceService {
                 }
             },
             include: {
+                members: {
+                    where: { userId },
+                    select: { role: true },
+                },
                 _count: {
                     select: { notes: true, members: true }
                 }

@@ -15,7 +15,7 @@ export class MailService {
   }
 
   async sendInvitationEmail(to: string, workspaceName: string, inviterName: string, token: string) {
-    const inviteLink = `${this.configService.get('FRONTEND_URL')}/invitations/accept?token=${token}`;
+    const inviteLink = `${this.configService.get('FRONTEND_URL') || 'http://localhost:3000'}/dashboard/workspaces/accept?token=${token}`;
     
     if (!this.apiKey) {
       this.logger.log(`[MOCK EMAIL] To: ${to} | Subject: Invitation to ${workspaceName} | Link: ${inviteLink}`);

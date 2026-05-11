@@ -23,6 +23,20 @@ export default function NewNote() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [mode, setMode] = useState<"audio" | "document" | "text">("audio");
+  const [workspaces, setWorkspaces] = useState<any[]>([]);
+  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string>("");
+
+  useEffect(() => {
+    const fetchWorkspaces = async () => {
+      try {
+        const data = await apiRequest<any[]>("/workspaces");
+        setWorkspaces(data);
+      } catch (err) {
+        console.error("Failed to fetch workspaces", err);
+      }
+    };
+    fetchWorkspaces();
+  }, []);
 
   // Recording State
   const [isRecording, setIsRecording] = useState(false);
@@ -143,6 +157,10 @@ export default function NewNote() {
       const formData = new FormData();
       formData.append("title", title);
       
+      if (selectedWorkspaceId) {
+        formData.append("workspaceId", selectedWorkspaceId);
+      }
+      
       if (mode === "text") {
         formData.append("transcript", transcript);
       } else if (mode === "audio" && audioFile) {
@@ -203,6 +221,24 @@ export default function NewNote() {
                   placeholder="e.g. Q3 Product Roadmap Sync"
                   className="w-full px-4 py-3 border border-zinc-200 rounded-xl text-sm bg-zinc-50 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black transition-colors"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-zinc-700 mb-2">
+                  Save to Workspace
+                </label>
+                <select
+                  value={selectedWorkspaceId}
+                  onChange={(e) => setSelectedWorkspaceId(e.target.value)}
+                  className="w-full px-4 py-3 border border-zinc-200 rounded-xl text-sm bg-zinc-50 text-zinc-900 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black transition-colors"
+                >
+                  <option value="">Personal Note (No Workspace)</option>
+                  {workspaces.map((ws) => (
+                    <option key={ws.id} value={ws.id}>
+                      {ws.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="flex bg-zinc-100 p-1 rounded-lg w-fit">
