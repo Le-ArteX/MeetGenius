@@ -49,9 +49,16 @@ export class NoteController {
     @Get()
     async findAll(
         @CurrentUser('id') userId: string,
-        @Query('workspaceId') workspaceId?: string
+        @Query('workspaceId') workspaceId?: string,
+        @Query('page') page?: string,
+        @Query('limit') limit?: string
     ) {
-        return this.noteService.findAll(userId, workspaceId);
+        return this.noteService.findAll(
+            userId, 
+            workspaceId, 
+            page ? parseInt(page) : 1, 
+            limit ? parseInt(limit) : 15
+        );
     }
 
     @Get(':id')

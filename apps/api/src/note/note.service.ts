@@ -235,42 +235,59 @@ export class NoteService {
         }
     }
 
-    async findAll(userId: string, workspaceId?: string) {
-        return this.prisma.note.findMany({
-            where: {
-                ...(workspaceId
-                    ? {
-                        workspaceId,
-                        workspace: {
-                            members: {
-                                some: { userId }
-                            }
+    async findAll(userId: string, workspaceId?: string, page: number = 1, limit: number = 15) {
+        const skip = (page - 1) * limit;
+
+        const where = {
+            ...(workspaceId
+                ? {
+                    workspaceId,
+                    workspace: {
+                        members: {
+                            some: { userId }
                         }
                     }
-                    : {
-                        OR: [
-                            { userId },
-                            {
-                                workspace: {
-                                    members: {
-                                        some: { userId }
-                                    }
+                }
+                : {
+                    OR: [
+                        { userId },
+                        {
+                            workspace: {
+                                members: {
+                                    some: { userId }
                                 }
                             }
-                        ]
-                    }
-                ),
-            },
-            include: {
-                actionItems: true,
-                workspace: {
-                    select: { name: true }
+                        }
+                    ]
                 }
-            },
-            orderBy: {
-                createdAt: 'desc',
-            },
-        });
+            ),
+        };
+
+        const [data, total] = await Promise.all([
+            this.prisma.note.findMany({
+                where,
+                include: {
+                    actionItems: true,
+                    workspace: {
+                        select: { name: true }
+                    }
+                },
+                orderBy: {
+                    createdAt: 'desc',
+                },
+                skip,
+                take: limit,
+            }),
+            this.prisma.note.count({ where }),
+        ]);
+
+        return {
+            data,
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
+        };
     }
 
     async findOne(userId: string, id: string) {
