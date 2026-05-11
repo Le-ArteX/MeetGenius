@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, UseGuards, Query, UseInterceptors, UploadedFile, BadRequestException } from "@nestjs/common";
+import { Controller, Get, Post, Patch, Body, Param, Delete, UseGuards, Query, UseInterceptors, UploadedFile, BadRequestException } from "@nestjs/common";
 import { NoteService } from "./note.service";
 import { CreateNoteDto } from "./dto/create-note.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
@@ -60,6 +60,15 @@ export class NoteController {
         @Param('id') id: string
     ) {
         return this.noteService.findOne(userId, id);
+    }
+
+    @Patch(':id')
+    async update(
+        @CurrentUser('id') userId: string,
+        @Param('id') id: string,
+        @Body() data: any
+    ) {
+        return this.noteService.update(userId, id, data);
     }
 
     @Delete(':id')

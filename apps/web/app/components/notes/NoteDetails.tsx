@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import DashboardTopbar from "../dashboard/DashboardTopbar";
 import DashboardSidebar, { SidebarLink } from "../dashboard/DashboardSidebar";
 import Logo from "../logo/logo";
 import { apiRequest } from "../../lib/api";
 import DeleteModal from "../ui/DeleteModal";
+import ShareDropdown from "../ui/ShareModal";
 
 import { useAuth } from "../../context/AuthContext";
 
@@ -27,12 +28,27 @@ export default function NoteDetails() {
   const [error, setError] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const shareButtonRef = useRef<HTMLButtonElement>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
+
+  // Edit states
+  const [editTitle, setEditTitle] = useState("");
+  const [editSummary, setEditSummary] = useState("");
+  const [editKeyDecision, setEditKeyDecision] = useState("");
+  const [editTranscript, setEditTranscript] = useState("");
 
   useEffect(() => {
     const fetchNote = async () => {
       try {
         const data = await apiRequest(`/notes/${id}`);
         setNote(data);
+        setEditTitle(data.title || "");
+        setEditSummary(data.summary || "");
+        setEditKeyDecision(data.keyDecision || "");
+        setEditTranscript(data.transcript || "");
       } catch (err: any) {
         setError("Failed to load note details");
         console.error(err);
@@ -90,20 +106,82 @@ export default function NoteDetails() {
             {/* Header Section */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold text-zinc-900">{note.title}</h1>
+                {isEditing ? (
+                  <input
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    className="text-3xl font-bold text-zinc-900 bg-zinc-100 px-3 py-1 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900/5 w-full max-w-xl"
+                  />
+                ) : (
+                  <h1 className="text-3xl font-bold text-zinc-900">{note.title}</h1>
+                )}
                 <div className="flex items-center gap-3">
-                  <button className="px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100 rounded-lg transition-colors">
-                    Share
-                  </button>
-                  <button className="px-4 py-2 text-sm font-medium text-white bg-zinc-900 hover:bg-zinc-800 rounded-lg transition-colors">
-                    Edit Note
-                  </button>
-                  <button 
-                    onClick={() => setIsDeleteModalOpen(true)}
-                    className="px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-red-100"
-                  >
-                    Delete
-                  </button>
+                  <div className="relative">
+                    <button 
+                      ref={shareButtonRef}
+                      onClick={() => setIsShareModalOpen(!isShareModalOpen)}
+                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${isCopied ? 'bg-green-50 text-green-600' : 'text-zinc-600 hover:bg-zinc-100'}`}
+                    >
+                      {isCopied ? 'Copied!' : 'Share'}
+                    </button>
+                    <ShareDropdown 
+                      isOpen={isShareModalOpen}
+                      onClose={() => setIsShareModalOpen(false)}
+                      note={note}
+                      anchorRef={shareButtonRef}
+                      onCopyLink={() => {
+                        navigator.clipboard.writeText(window.location.href);
+                        setIsCopied(true);
+                        setTimeout(() => setIsCopied(false), 2000);
+                      }}
+                    />
+                  </div>
+                  
+                  {isEditing ? (
+                    <button 
+                      onClick={async () => {
+                        setIsSaving(true);
+                        try {
+                          const updated = await apiRequest(`/notes/${id}`, {
+                            method: "PATCH",
+                            data: {
+                              title: editTitle,
+                              summary: editSummary,
+                              keyDecision: editKeyDecision,
+                              transcript: editTranscript,
+                            }
+                          });
+                          setNote(updated);
+                          setIsEditing(false);
+                        } catch (err) {
+                          console.error("Failed to update note", err);
+                          alert("Failed to save changes.");
+                        } finally {
+                          setIsSaving(false);
+                        }
+                      }}
+                      disabled={isSaving}
+                      className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors flex items-center gap-2"
+                    >
+                      {isSaving ? "Saving..." : "Save Changes"}
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={() => setIsEditing(true)}
+                      className="px-4 py-2 text-sm font-medium text-white bg-zinc-900 hover:bg-zinc-800 rounded-lg transition-colors"
+                    >
+                      Edit Note
+                    </button>
+                  )}
+
+                  {!isEditing && (
+                    <button 
+                      onClick={() => setIsDeleteModalOpen(true)}
+                      className="px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-red-100"
+                    >
+                      Delete
+                    </button>
+                  )}
                 </div>
               </div>
               <div className="flex items-center gap-6 text-sm text-zinc-500">
@@ -131,7 +209,17 @@ export default function NoteDetails() {
                 <h2 className="text-lg font-bold">AI Summary</h2>
               </div>
               <div className="prose prose-zinc max-w-none text-zinc-700 leading-relaxed">
-                {note.summary || "No summary available yet. The AI is still processing your note."}
+                {isEditing ? (
+                  <textarea
+                    value={editSummary}
+                    onChange={(e) => setEditSummary(e.target.value)}
+                    rows={4}
+                    className="w-full p-4 bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900/5 resize-none"
+                    placeholder="Note summary..."
+                  />
+                ) : (
+                  note.summary || "No summary available yet. The AI is still processing your note."
+                )}
               </div>
             </section>
 
@@ -140,7 +228,17 @@ export default function NoteDetails() {
               <section className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-8 space-y-6">
                 <h2 className="text-lg font-bold text-zinc-900">Key Decisions</h2>
                 <div className="prose prose-zinc text-zinc-700">
-                  {note.keyDecision || "No decisions recorded."}
+                  {isEditing ? (
+                    <textarea
+                      value={editKeyDecision}
+                      onChange={(e) => setEditKeyDecision(e.target.value)}
+                      rows={4}
+                      className="w-full p-4 bg-zinc-50 border border-zinc-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-zinc-900/5 resize-none"
+                      placeholder="Key decisions..."
+                    />
+                  ) : (
+                    note.keyDecision || "No decisions recorded."
+                  )}
                 </div>
               </section>
 
@@ -181,9 +279,19 @@ export default function NoteDetails() {
             <section className="space-y-4">
               <h2 className="text-lg font-bold text-zinc-900">Transcript</h2>
               <div className="bg-zinc-50 rounded-2xl p-8 border border-zinc-200">
-                <pre className="whitespace-pre-wrap font-mono text-xs text-zinc-600 leading-relaxed max-h-96 overflow-y-auto">
-                  {note.transcript || "No transcript available."}
-                </pre>
+                {isEditing ? (
+                  <textarea
+                    value={editTranscript}
+                    onChange={(e) => setEditTranscript(e.target.value)}
+                    rows={12}
+                    className="w-full p-0 border-none text-xs font-mono bg-transparent placeholder:text-zinc-400 resize-none focus:ring-0"
+                    placeholder="Full transcript..."
+                  />
+                ) : (
+                  <pre className="whitespace-pre-wrap font-mono text-xs text-zinc-600 leading-relaxed max-h-96 overflow-y-auto">
+                    {note.transcript || "No transcript available."}
+                  </pre>
+                )}
               </div>
             </section>
           </div>

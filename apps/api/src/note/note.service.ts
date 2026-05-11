@@ -292,6 +292,20 @@ export class NoteService {
         });
     }
 
+    async update(userId: string, id: string, data: Partial<{ title: string, summary: string, keyDecision: string, transcript: string }>) {
+        const note = await this.findOne(userId, id);
+        if (!note) throw new NotFoundException('Note not found or no permission to edit');
+
+        return this.prisma.note.update({
+            where: { id },
+            data,
+            include: { 
+                actionItems: true,
+                workspace: { select: { name: true } }
+            },
+        });
+    }
+
     async delete(userId: string, id: string) {
         const note = await this.prisma.note.findUnique({
             where: { id },
