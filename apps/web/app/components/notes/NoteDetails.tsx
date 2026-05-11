@@ -6,6 +6,7 @@ import DashboardTopbar from "../dashboard/DashboardTopbar";
 import DashboardSidebar, { SidebarLink } from "../dashboard/DashboardSidebar";
 import Logo from "../logo/logo";
 import { apiRequest } from "../../lib/api";
+import DeleteModal from "../ui/DeleteModal";
 
 import { useAuth } from "../../context/AuthContext";
 
@@ -25,6 +26,7 @@ export default function NoteDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchNote = async () => {
@@ -79,7 +81,7 @@ export default function NoteDetails() {
         <DashboardSidebar 
           links={sidebarLinks} 
           activeLinkId="notes" 
-          user={user ? { name: user.email.split('@')[0] || "User", email: user.email, avaterUrl: user.avatarUrl || undefined } : undefined}
+          user={user ? { name: user.email.split('@')[0] || "User", email: user.email, avatarUrl: user.avatarUrl || undefined } : undefined}
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
         />
@@ -95,6 +97,12 @@ export default function NoteDetails() {
                   </button>
                   <button className="px-4 py-2 text-sm font-medium text-white bg-zinc-900 hover:bg-zinc-800 rounded-lg transition-colors">
                     Edit Note
+                  </button>
+                  <button 
+                    onClick={() => setIsDeleteModalOpen(true)}
+                    className="px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-red-100"
+                  >
+                    Delete
                   </button>
                 </div>
               </div>
@@ -181,6 +189,21 @@ export default function NoteDetails() {
           </div>
         </main>
       </div>
+      <DeleteModal 
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={async () => {
+          try {
+            await apiRequest(`/notes/${note.id}`, { method: "DELETE" });
+            router.push("/dashboard");
+          } catch (err) {
+            console.error("Failed to delete note", err);
+            alert("Failed to delete note. Please try again.");
+          }
+        }}
+        title="Delete Meeting Note"
+        description={`Are you sure you want to delete "${note.title}"? This action is permanent and cannot be undone.`}
+      />
     </div>
   );
 }

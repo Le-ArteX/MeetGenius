@@ -15,7 +15,7 @@ export interface DashboardSidebarProps {
   user?: {
     name: string;
     email: string;
-    avaterUrl?: string;
+    avatarUrl?: string;
   };
   isOpen?: boolean;
   onClose?: () => void;
@@ -88,7 +88,7 @@ export default function DashboardSidebar({ links, activeLinkId, user, isOpen, on
                 className={[
                   "group flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-150",
                   isActive
-                    ? "bg-zinc-100 text-zinc-900 shadow-sm"
+                    ? "text-zinc-900"
                     : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-800",
                 ].join(" ")}>
                 <SidebarIcon icon={link.icon} className={`w-4 h-4 ${isActive ? "text-zinc-900" : "text-zinc-400 group-hover:text-zinc-600"}`} />
@@ -101,8 +101,8 @@ export default function DashboardSidebar({ links, activeLinkId, user, isOpen, on
         <div className="pt-6 mt-4 border-t border-zinc-100 flex flex-col gap-5">
           <div className="flex items-center gap-3 px-2">
             <div className="w-9 h-9 bg-zinc-900 rounded-full flex items-center justify-center shrink-0 shadow-md">
-              {user?.avaterUrl ? (
-                <img src={user.avaterUrl} alt="" className="w-full h-full object-cover rounded-full" />
+              {user?.avatarUrl ? (
+                <img src={user.avatarUrl} alt="" className="w-full h-full object-cover rounded-full" />
               ) : (
                 <span className="text-white font-bold text-xs">
                   {user?.name?.[0]?.toUpperCase() || "M"}

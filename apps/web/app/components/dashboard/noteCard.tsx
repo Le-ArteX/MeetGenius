@@ -6,17 +6,25 @@ export interface NoteCardProps {
     preview: string;
     date: string;
     actionCount: number;
+    workspaceName?: string;
     onClick?: (id: string) => void;
 }
 
-export default function NoteCard({ id, title, preview, date, actionCount, onClick }: NoteCardProps) {
+export default function NoteCard({ id, title, preview, date, actionCount, workspaceName, onClick }: NoteCardProps) {
     return (
         <div
             onClick={() => onClick?.(id)}
             className="w-full flex items-center justify-between px-6 py-5 border border-zinc-200 rounded-xl bg-white hover:border-zinc-300 hover:shadow-sm transition-all duration-150 cursor-pointer group"
         >
             <div className="flex flex-col gap-1.5 flex-1 min-w-0 mr-8">
-                <h3 className="text-lg font-bold text-zinc-900 group-hover:text-blue-600 transition-colors truncate">{title}</h3>
+                <div className="flex items-center gap-2">
+                    <h3 className="text-lg font-bold text-zinc-900 group-hover:text-blue-600 transition-colors truncate">{title}</h3>
+                    {workspaceName && (
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 bg-zinc-100 px-1.5 py-0.5 rounded">
+                            {workspaceName}
+                        </span>
+                    )}
+                </div>
                 <p className="text-sm text-zinc-500 font-medium truncate">{preview}</p>
                 <span className="text-sm text-zinc-400">{date}</span>
             </div>

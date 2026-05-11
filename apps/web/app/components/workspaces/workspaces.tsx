@@ -29,7 +29,7 @@ interface WorkspaceMember {
     workspaceId: string;
     role: "OWNER" | "EDITOR" | "VIEWER";
     joinedAt: string;
-    user: { id: string; email: string; avaterUrl?: string | null };
+    user: { id: string; email: string; avatarUrl?: string | null };
 }
 
 // --- Toast Component ---
@@ -125,7 +125,7 @@ function WorkspaceCard({
                                 {members.map((member) => (
                                     <div key={member.userId} className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-zinc-50 transition-colors">
                                         <div className="flex items-center gap-3">
-                                            <MemberAvatar email={member.user.email} avatarUrl={member.user.avaterUrl} size={32} />
+                                            <MemberAvatar email={member.user.email} avatarUrl={member.user.avatarUrl} size={32} />
                                             <div>
                                                 <p className="text-sm font-medium text-zinc-900">{member.user.email}</p>
                                                 <p className="text-xs text-zinc-400">Joined {new Date(member.joinedAt).toLocaleDateString()}</p>
@@ -341,7 +341,7 @@ export default function WorkspacesPage() {
         }
     };
 
-    const sidebarUser = user ? { name: user.email.split("@")[0] || user.email, email: user.email, avaterUrl: user.avatarUrl || undefined } : undefined;
+    const sidebarUser = user ? { name: user.email.split("@")[0] || user.email, email: user.email, avatarUrl: user.avatarUrl || undefined } : undefined;
 
     return (
         <div className="h-screen flex flex-col bg-white">

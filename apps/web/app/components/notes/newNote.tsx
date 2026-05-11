@@ -6,6 +6,7 @@ import DashboardSidebar, { SidebarLink } from "../dashboard/DashboardSidebar";
 import Logo from "../logo/logo";
 import { apiRequest } from "../../lib/api";
 import { useRouter } from "next/navigation";
+import { useAuth } from "../../context/AuthContext";
 
 const sidebarLinks: SidebarLink[] = [
   { id: "notes", label: "Notes", href: "/dashboard", icon: "notes" },
@@ -16,6 +17,7 @@ const sidebarLinks: SidebarLink[] = [
 
 export default function NewNote() {
   const router = useRouter();
+  const { user } = useAuth();
   const [title, setTitle] = useState("");
   const [transcript, setTranscript] = useState("");
   const [audioFile, setAudioFile] = useState<File | null>(null);
@@ -171,10 +173,7 @@ export default function NewNote() {
 
       await apiRequest("/notes", {
         method: "POST",
-        body: formData,
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+        data: formData,
       });
 
       // Redirect to dashboard immediately while it processes in the background!
@@ -196,7 +195,11 @@ export default function NewNote() {
       />
 
       <div className="flex flex-1 min-h-0">
-        <DashboardSidebar links={sidebarLinks} activeLinkId="notes" />
+        <DashboardSidebar 
+          links={sidebarLinks} 
+          activeLinkId="notes" 
+          user={user ? { name: user.email.split('@')[0] || "User", email: user.email, avatarUrl: user.avatarUrl || undefined } : undefined}
+        />
         <main className="flex-1 overflow-y-auto px-6 sm:px-12 py-10 bg-zinc-50/10">
           <div className="max-w-2xl space-y-6">
             <div className="flex items-center justify-between">

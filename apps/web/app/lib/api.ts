@@ -6,9 +6,7 @@ const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 5000, // 5 seconds timeout
   withCredentials: true, // This ensures cookies are sent with requests
-  headers: {
-    "Content-Type": "application/json",
-  },
+  headers: {},
 });
 
 // Automatically add the token to every request
@@ -20,15 +18,31 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Automatically redirect to login if the session is invalid or expired
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401 && typeof window !== "undefined") {
+      // Avoid redirect loops if already on login
+      if (!window.location.pathname.startsWith('/login')) {
+        console.warn("Session expired. Redirecting to login...");
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export async function apiRequest<T = any>(endpoint: string, options: any = {}): Promise<T> {
   try {
     console.log(`[API] Starting ${options.method || "GET"} ${endpoint}...`);
+    const requestData = options.data || options.body;
     const response = await api({
       url: endpoint,
       method: options.method || "GET",
-      data: options.body instanceof FormData 
-        ? options.body 
-        : (options.body ? JSON.parse(options.body) : undefined),
+      data: requestData instanceof FormData 
+        ? requestData 
+        : (typeof requestData === 'string' ? JSON.parse(requestData) : requestData),
       headers: {
         ...options.headers,
       },

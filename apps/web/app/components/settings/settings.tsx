@@ -5,6 +5,7 @@ import DashboardTopbar from "../dashboard/DashboardTopbar";
 import DashboardSidebar, { SidebarLink } from "../dashboard/DashboardSidebar";
 import Logo from "../logo/logo";
 import api, { apiRequest } from "../../lib/api";
+import { useAuth } from "../../context/AuthContext";
 
 const sidebarLinks: SidebarLink[] = [
   { id: "notes", label: "Notes", href: "/dashboard", icon: "notes" },
@@ -14,6 +15,7 @@ const sidebarLinks: SidebarLink[] = [
 ];
 
 export default function Settings() {
+  const { user: authUser } = useAuth();
   const [user, setUser] = useState<any>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -25,7 +27,6 @@ export default function Settings() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    /*
     async function fetchProfile() {
       try {
         setError(null);
@@ -35,20 +36,11 @@ export default function Settings() {
         setEmail(data.email || "");
       } catch (err: any) {
         console.error("Failed to fetch profile:", err);
-        setError(err.message || "Failed to load settings. Are you logged in?");
+        setError(err.message || "Failed to load settings.");
       }
     }
     fetchProfile();
-    */
-    // Default placeholder data for UI testing
-    setUser({ name: "Mursalin Leon", email: "mursalinleon2295@gmail.com" });
-    setName("Mursalin Leon");
-    setEmail("mursalinleon2295@gmail.com");
   }, []);
-
-  const handleRetry = () => {
-    window.location.reload();
-  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,11 +51,12 @@ export default function Settings() {
     try {
       const updated = await apiRequest("/users/profile", {
         method: "PATCH",
-        body: JSON.stringify({ name, email }),
+        body: JSON.stringify({ name, email, password: password || undefined }),
       });
       setUser(updated);
       setSaved(true);
       setPassword("");
+      // Force refresh auth context if needed or just let it be
     } catch (err: any) {
       setError(err.message || "Failed to update profile");
     } finally {
@@ -87,7 +80,7 @@ export default function Settings() {
       const response = await api.post("/users/avatar", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      setUser({ ...user, avaterUrl: response.data.avatarUrl });
+      setUser({ ...user, avatarUrl: response.data.avatarUrl });
       setSaved(true);
     } catch (err: any) {
       alert(err.response?.data?.message || "Failed to upload image");
@@ -95,6 +88,8 @@ export default function Settings() {
       setSaving(false);
     }
   };
+
+  const sidebarUser = user ? { name: user.name || user.email.split("@")[0], email: user.email, avatarUrl: user.avatarUrl || undefined } : undefined;
 
   if (error && !user) {
     return (
@@ -107,17 +102,12 @@ export default function Settings() {
           </div>
           <h2 className="text-xl font-bold text-zinc-900 mb-2">Connection Error</h2>
           <p className="text-zinc-500 mb-6 text-sm">{error}</p>
-          <div className="flex flex-col gap-3">
-            <button
-              onClick={handleRetry}
-              className="w-full bg-zinc-900 text-white font-bold py-3 rounded-xl hover:bg-zinc-800 transition-all shadow-md cursor-pointer"
-            >
-              Retry Connection
-            </button>
-            <p className="text-xs text-zinc-400 mt-2">
-              Make sure your API server is running on <span className="font-mono">localhost:4000</span>
-            </p>
-          </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="w-full bg-zinc-900 text-white font-bold py-3 rounded-xl hover:bg-zinc-800 transition-all shadow-md cursor-pointer"
+          >
+            Retry Connection
+          </button>
         </div>
       </div>
     );
@@ -125,10 +115,7 @@ export default function Settings() {
 
   if (!user) return (
     <div className="h-screen flex items-center justify-center bg-white">
-      <div className="flex flex-col items-center gap-4">
-        <div className="w-10 h-10 border-4 border-zinc-900 border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-zinc-500 font-medium animate-pulse">Loading settings...</p>
-      </div>
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-900"></div>
     </div>
   );
 
@@ -145,113 +132,88 @@ export default function Settings() {
         <DashboardSidebar 
           links={sidebarLinks} 
           activeLinkId="settings" 
-          user={user} 
+          user={sidebarUser} 
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
         />
         <main className="flex-1 overflow-y-auto px-6 md:px-12 py-8 md:py-10 bg-zinc-50/10">
-          <div className="max-w-5xl mx-auto">
+          <div className="max-w-4xl mx-auto">
             <div className="mb-10">
               <h1 className="text-3xl font-bold text-zinc-900 tracking-tight">Settings</h1>
-              <p className="text-zinc-500 text-sm mt-1 font-medium">Manage your account settings and preferences.</p>
+              <p className="text-zinc-500 text-sm mt-1 font-medium">Manage your account settings and profile.</p>
             </div>
 
             <div className="space-y-6">
               <div className="bg-white border border-zinc-200 shadow-sm rounded-2xl p-8">
-                <div className="mb-8">
-                  <h2 className="text-lg font-bold text-zinc-900">Profile Information</h2>
-                  <p className="text-zinc-500 text-xs mt-1 font-medium">Update your personal details and profile picture.</p>
-                </div>
-
-                <div className="flex items-center justify-between mb-8 pb-8 border-b border-zinc-100">
-                  <div className="flex items-center gap-5">
-                    <div className="relative group">
-                      <div className="w-16 h-16 bg-zinc-900 rounded-full flex items-center justify-center shrink-0 shadow-lg border-4 border-white overflow-hidden">
-                        {user?.avaterUrl ? (
-                          <img src={user.avaterUrl} alt="Avatar" className="w-full h-full object-cover" />
-                        ) : (
-                          <span className="text-white font-bold text-xl">
-                            {user?.name?.[0]?.toUpperCase() ?? "U"}
-                          </span>
-                        )}
-                      </div>
+                <div className="flex items-center gap-6 mb-8 pb-8 border-b border-zinc-100">
+                  <div className="relative group cursor-pointer" onClick={handleAvatarClick}>
+                    <div className="w-20 h-20 bg-zinc-900 rounded-full flex items-center justify-center shrink-0 shadow-lg border-4 border-white overflow-hidden">
+                      {user?.avatarUrl ? (
+                        <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-white font-bold text-2xl">
+                          {user?.name?.[0]?.toUpperCase() ?? user?.email?.[0]?.toUpperCase()}
+                        </span>
+                      )}
                     </div>
-                    <div>
-                      <p className="font-bold text-zinc-900 text-base">{user?.name}</p>
-                      <p className="text-xs text-zinc-400 font-medium">{user?.email}</p>
+                    <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                      <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
                     </div>
                   </div>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileChange}
-                    className="hidden"
-                    accept="image/*"
-                  />
-                  <button
-                    onClick={handleAvatarClick}
-                    className="text-xs font-bold text-zinc-900 bg-zinc-50 border border-zinc-200 px-4 py-2 rounded-xl hover:bg-zinc-100 transition-all shadow-sm cursor-pointer"
-                  >
-                    Change photo
-                  </button>
+                  <div>
+                    <h2 className="text-lg font-bold text-zinc-900">{user?.name || "User"}</h2>
+                    <p className="text-sm text-zinc-500">{user?.email}</p>
+                    <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
+                  </div>
                 </div>
 
                 <form onSubmit={handleSave} className="space-y-6">
-                  <div className="grid grid-cols-1 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <label className="text-sm font-bold text-zinc-700">Full name</label>
+                      <label className="text-sm font-bold text-zinc-700 ml-1">Full Name</label>
                       <input
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="w-full px-4 py-3 rounded-xl border border-zinc-200 bg-zinc-50/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                        placeholder="John Doe"
+                        className="w-full px-4 py-3 rounded-xl border border-zinc-200 bg-zinc-50/50 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 transition-all"
+                        placeholder="Your name"
                       />
                     </div>
-
                     <div className="space-y-2">
-                      <label className="text-sm font-bold text-zinc-700">Email address</label>
+                      <label className="text-sm font-bold text-zinc-700 ml-1">Email Address</label>
                       <input
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full px-4 py-3 rounded-xl border border-zinc-200 bg-zinc-50/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                        placeholder="john@example.com"
+                        className="w-full px-4 py-3 rounded-xl border border-zinc-200 bg-zinc-50/50 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 transition-all"
+                        placeholder="you@example.com"
                       />
                     </div>
-
-                    <div className="space-y-2">
-                      <label className="text-sm font-bold text-zinc-700 flex items-center justify-between">
-                        New password
-                        <span className="text-zinc-400 font-normal text-xs">(optional)</span>
-                      </label>
+                    <div className="space-y-2 md:col-span-2">
+                      <label className="text-sm font-bold text-zinc-700 ml-1">New Password (leave blank to keep current)</label>
                       <input
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        className="w-full px-4 py-3 rounded-xl border border-zinc-200 bg-zinc-50/50 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 transition-all"
                         placeholder="Min. 8 characters"
                         minLength={8}
-                        className="w-full px-4 py-3 rounded-xl border border-zinc-200 bg-zinc-50/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                       />
                     </div>
                   </div>
 
                   <div className="pt-4 flex items-center justify-between">
-                    <div className="flex-1 mr-4">
-                      {saved && (
-                        <p className="text-green-600 text-xs font-bold flex items-center gap-1.5 animate-pulse">
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                          Changes saved successfully
-                        </p>
-                      )}
-                      {error && <p className="text-red-500 text-xs font-bold">{error}</p>}
+                    <div>
+                      {saved && <p className="text-emerald-600 text-sm font-bold">Changes saved!</p>}
+                      {error && <p className="text-red-500 text-sm font-bold">{error}</p>}
                     </div>
                     <button
                       type="submit"
                       disabled={saving}
-                      className="bg-zinc-900 text-white px-8 py-3 rounded-xl font-bold text-sm shadow-md disabled:opacity-50 transition-all hover:bg-zinc-800 active:scale-[0.98] cursor-pointer"
+                      className="bg-zinc-900 text-white px-8 py-3 rounded-xl font-bold text-sm shadow-lg disabled:opacity-50 hover:bg-zinc-800 transition-all active:scale-[0.98] cursor-pointer"
                     >
                       {saving ? "Saving..." : "Save Changes"}
                     </button>
@@ -259,20 +221,12 @@ export default function Settings() {
                 </form>
               </div>
 
-              <div className="bg-red-50/30 border border-red-100 rounded-2xl p-8 shadow-sm">
-                <div className="mb-6">
-                  <h2 className="text-base font-bold text-red-700">Danger Zone</h2>
-                  <p className="text-red-600/70 text-xs mt-1 font-medium">Irreversible and destructive actions.</p>
-                </div>
-                <div className="flex items-center justify-between p-6 bg-white border border-red-100 rounded-xl shadow-sm">
-                  <div>
-                    <p className="text-sm font-bold text-zinc-900">Delete Account</p>
-                    <p className="text-xs text-zinc-500 mt-0.5">Permanently remove your account and all data.</p>
-                  </div>
-                  <button className="text-xs font-bold text-red-600 border border-red-200 bg-red-50 px-5 py-2.5 rounded-xl hover:bg-red-100 transition-all shadow-sm cursor-pointer">
-                    Delete Account
-                  </button>
-                </div>
+              <div className="bg-white border border-red-100 rounded-2xl p-8 shadow-sm">
+                <h2 className="text-lg font-bold text-red-600 mb-2">Danger Zone</h2>
+                <p className="text-sm text-zinc-500 mb-6">Once you delete your account, there is no going back. Please be certain.</p>
+                <button className="bg-red-50 text-red-600 border border-red-200 px-6 py-3 rounded-xl font-bold text-sm hover:bg-red-100 transition-all cursor-pointer">
+                  Delete Account
+                </button>
               </div>
             </div>
           </div>

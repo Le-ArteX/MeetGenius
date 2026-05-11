@@ -20,6 +20,7 @@ export default function Dashboard() {
   const { user } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [notes, setNotes] = useState<NoteCardProps[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,9 +32,10 @@ export default function Dashboard() {
         const formattedNotes: NoteCardProps[] = response.map((n: any) => ({
           id: n.id,
           title: n.title,
-          preview: n.summary || n.transcript?.substring(0, 50) + "..." || "No content",
+          preview: n.summary || (n.transcript ? n.transcript.substring(0, 80) + "..." : "Processing summary..."),
           date: new Date(n.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
           actionCount: n.actionItems?.length || 0,
+          workspaceName: n.workspace?.name,
         }));
 
         setNotes(formattedNotes);
@@ -47,6 +49,12 @@ export default function Dashboard() {
     fetchNotes();
   }, []);
 
+  const filteredNotes = notes.filter(note => 
+    note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    note.preview.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    note.workspaceName?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="h-screen flex flex-col bg-white">
       <DashboardTopbar
@@ -56,7 +64,7 @@ export default function Dashboard() {
         ctaLabel="+ Note"
         ctaHref="/dashboard/new"
         logo={<Logo />}
-        onSearch={(val) => console.log("Searching for:", val)}
+        onSearch={(val) => setSearchQuery(val)}
         onMenuClick={() => setIsSidebarOpen(true)}
       />
 
@@ -64,7 +72,7 @@ export default function Dashboard() {
         <DashboardSidebar
           links={sidebarLinks}
           activeLinkId="notes"
-          user={user ? { name: user.email.split('@')[0] || "User", email: user.email, avaterUrl: user.avatarUrl || undefined } : undefined}
+          user={user ? { name: user.email.split('@')[0] || "User", email: user.email, avatarUrl: user.avatarUrl || undefined } : undefined}
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
         />
@@ -75,9 +83,9 @@ export default function Dashboard() {
             <div className="flex items-center justify-center py-20">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-900"></div>
             </div>
-          ) : notes.length > 0 ? (
+          ) : filteredNotes.length > 0 ? (
             <div className="flex flex-col gap-4 w-full">
-              {notes.map((note) => (
+              {filteredNotes.map((note) => (
                 <Link href={`/dashboard/${note.id}`} key={note.id}>
                   <NoteCard {...note} />
                 </Link>
@@ -85,7 +93,9 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-zinc-200">
-              <p className="text-zinc-500 mb-4">No notes found yet.</p>
+              <p className="text-zinc-500 mb-4">
+                {searchQuery ? `No notes found matching "${searchQuery}"` : "No notes found yet."}
+              </p>
               <Link href="/dashboard/new" className="text-blue-600 font-semibold hover:underline">
                 Create your first note →
               </Link>
