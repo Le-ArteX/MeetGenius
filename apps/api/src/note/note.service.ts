@@ -238,30 +238,39 @@ export class NoteService {
     async findAll(userId: string, workspaceId?: string, page: number = 1, limit: number = 15) {
         const skip = (page - 1) * limit;
 
-        const where = {
-            ...(workspaceId
-                ? {
-                    workspaceId,
-                    workspace: {
-                        members: {
-                            some: { userId }
-                        }
+        let where: any = {};
+
+        if (workspaceId === 'personal') {
+            // Filter for notes that belong to the user but HAVE NO workspace
+            where = {
+                userId,
+                workspaceId: null,
+            };
+        } else if (workspaceId) {
+            // Filter by a specific workspace ID (ensure user is a member)
+            where = {
+                workspaceId,
+                workspace: {
+                    members: {
+                        some: { userId }
                     }
                 }
-                : {
-                    OR: [
-                        { userId },
-                        {
-                            workspace: {
-                                members: {
-                                    some: { userId }
-                                }
+            };
+        } else {
+            // No filter: Show ALL notes user has access to
+            where = {
+                OR: [
+                    { userId },
+                    {
+                        workspace: {
+                            members: {
+                                some: { userId }
                             }
                         }
-                    ]
-                }
-            ),
-        };
+                    }
+                ]
+            };
+        }
 
         const [data, total] = await Promise.all([
             this.prisma.note.findMany({

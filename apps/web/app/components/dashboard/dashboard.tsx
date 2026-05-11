@@ -23,15 +23,29 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   
+  // Workspace state
+  const [workspaces, setWorkspaces] = useState<{ id: string, name: string }[]>([]);
+  const [selectedWorkspace, setSelectedWorkspace] = useState<{ id: string, name: string } | null>(null);
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalNotes, setTotalNotes] = useState(0);
 
-  const fetchNotes = async (page: number) => {
+  const fetchWorkspaces = async () => {
+    try {
+      const response = await apiRequest<any>('/workspaces?limit=100');
+      setWorkspaces(response.data || []);
+    } catch (error) {
+      console.error("Failed to load workspaces", error);
+    }
+  };
+
+  const fetchNotes = async (page: number, workspaceId?: string) => {
     setLoading(true);
     try {
-      const response = await apiRequest<any>(`/notes?page=${page}&limit=15`);
+      const url = `/notes?page=${page}&limit=15${workspaceId ? `&workspaceId=${workspaceId}` : ''}`;
+      const response = await apiRequest<any>(url);
       const { data, total, totalPages: totalP } = response;
 
       // Map backend notes to NoteCardProps
@@ -55,8 +69,12 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    fetchNotes(currentPage);
-  }, [currentPage]);
+    fetchWorkspaces();
+  }, []);
+
+  useEffect(() => {
+    fetchNotes(currentPage, selectedWorkspace?.id);
+  }, [currentPage, selectedWorkspace]);
 
   const filteredNotes = notes.filter(note => 
     note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -69,10 +87,22 @@ export default function Dashboard() {
       <DashboardTopbar
         logoText="MeetGenius"
         logoHref="/dashboard"
-        workspaceName="My Workspace"
+        workspaceName={
+          selectedWorkspace?.id === "personal" 
+            ? "Personal Notes" 
+            : selectedWorkspace?.name || "All Notes"
+        }
+        workspaces={[
+          { id: "", name: "All Notes" },
+          { id: "personal", name: "Personal Notes" },
+          ...workspaces
+        ]}
+        onWorkspaceSelect={(ws) => {
+          setSelectedWorkspace(ws.id === "" ? null : ws);
+          setCurrentPage(1);
+        }}
         ctaLabel="+ Note"
         ctaHref="/dashboard/new"
-        logo={<Logo />}
         onSearch={(val) => setSearchQuery(val)}
         onMenuClick={() => setIsSidebarOpen(true)}
       />
