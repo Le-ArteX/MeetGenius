@@ -1,7 +1,7 @@
 import { ForbiddenException, Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateNoteDto } from "./dto/create-note.dto";
-import { OpenAI } from 'openai';
+import { OpenAI, toFile } from 'openai';
 import { ConfigService } from "@nestjs/config";
 
 @Injectable()
@@ -57,9 +57,12 @@ export class NoteService {
 
         // Trigger background processing if transcript exists
         if (dto.transcript) {
+            this.logger.log(`Triggering background processing for note ${note.id} with transcript length ${dto.transcript.length}`);
             this.processNote(note.id, dto.transcript).catch(err => {
-                this.logger.error(`Failed to process note ${note.id}: ${err.message}`);
+                this.logger.error(`Background process execution error for note ${note.id}: ${err.message}`);
             });
+        } else {
+            this.logger.warn(`No transcript found for note ${note.id}, skipping background processing.`);
         }
 
         return note;
@@ -71,9 +74,10 @@ export class NoteService {
         }
         try {
             const response = await this.openai.audio.transcriptions.create({
-                file: await OpenAI.toFile(file.buffer, file.originalname),
+                file: await toFile(file.buffer, file.originalname),
                 model: 'whisper-large-v3-turbo',
             });
+            this.logger.log(`Transcription completed for ${file.originalname}. Result length: ${response.text?.length || 0}`);
             return response.text;
         } catch (error) {
             this.logger.error(`Transcription failed: ${error.message}`);
@@ -88,7 +92,8 @@ export class NoteService {
         try {
             if (filename.endsWith('.pdf') || mimeType === 'application/pdf') {
                 // pdf-parse v2.x uses a class-based API: PDFParse
-                const { PDFParse } = require('pdf-parse');
+                const pdfModule = require('pdf-parse');
+                const PDFParse = pdfModule.PDFParse || pdfModule;
 
                 const parser = new PDFParse({
                     data: new Uint8Array(file.buffer),
@@ -100,8 +105,11 @@ export class NoteService {
                 const result = await parser.getText();
                 const text = result.text?.trim() || '';
 
+                this.logger.log(`PDF parsed successfully. Extracted ${text.length} characters.`);
+
                 if (!text) {
-                    throw new Error('PDF extraction returned empty text.');
+                    this.logger.warn('PDF extraction returned empty text.');
+                    throw new Error('PDF extraction returned empty text. The file might be scanned (OCR required) or empty.');
                 }
 
                 // Clean up pdfjs-dist resources
@@ -147,25 +155,30 @@ export class NoteService {
         this.logger.log(`Processing note ${noteId}...`);
 
         try {
+
+            // Truncate transcript if it's too long for the model (approx 15k words)
+            const truncatedTranscript = transcript.length > 60000 
+                ? transcript.substring(0, 60000) + "... [Truncated]" 
+                : transcript;
+
             const prompt = `
                 Analyze the following meeting transcript and provide a comprehensive and detailed summary, 
                 key decisions made, and specific action items.
                 
                 The "summary" field should be thorough, capturing the context, main discussion points, 
-                and any important nuances from the conversation. Aim for a detailed overview rather than a brief sentence.
-                
-                Format the response as JSON with the following structure:
+                and any important nuances from the conversation. 
+
+                Format the response as JSON with exactly these keys:
                 {
-                    "summary": "...",
-                    "keyDecisions": "...",
+                    "summary": "detailed summary here",
+                    "keyDecisions": "key decisions here",
                     "actionItems": [
-                        { "text": "...", "assignee": "..." },
-                        ...
+                        { "text": "task description", "assignee": "name or null" }
                     ]
                 }
 
                 Transcript:
-                ${transcript}
+                ${truncatedTranscript}
             `;
 
             const response = await this.openai.chat.completions.create({
@@ -175,25 +188,41 @@ export class NoteService {
             });
 
             const content = response.choices[0].message.content;
-            if (!content) throw new Error('No content returned from OpenAI');
+            if (!content) {
+                this.logger.error(`AI returned empty content for note ${noteId}`);
+                throw new Error('No content returned from OpenAI');
+            }
 
-            const result = JSON.parse(content);
+            this.logger.log(`AI response received for note ${noteId}. Content length: ${content.length}`);
+            
+            let result;
+            try {
+                result = JSON.parse(content);
+            } catch (parseError) {
+                this.logger.error(`Failed to parse AI JSON for note ${noteId}: ${content}`);
+                throw new Error(`Invalid JSON format from AI: ${parseError.message}`);
+            }
+
+            // Normalize results (handle camelCase vs snake_case)
+            const summary = result.summary || result.detailed_summary || '';
+            const keyDecisions = result.keyDecisions || result.key_decisions || result.decisions || '';
+            const actionItems = result.actionItems || result.action_items || [];
 
             await this.prisma.$transaction(async (tx) => {
                 await tx.note.update({
                     where: { id: noteId },
                     data: {
-                        summary: result.summary,
-                        keyDecision: result.keyDecisions,
+                        summary,
+                        keyDecision: keyDecisions,
                         wordCount: transcript.trim() ? transcript.trim().split(/\s+/).length : 0,
                     },
                 });
 
-                if (result.actionItems && result.actionItems.length > 0) {
+                if (Array.isArray(actionItems) && actionItems.length > 0) {
                     await tx.actionItem.createMany({
-                        data: result.actionItems.map((item: any) => ({
-                            text: item.text,
-                            assignee: item.assignee || null,
+                        data: actionItems.map((item: any) => ({
+                            text: item.text || item.description || '',
+                            assignee: item.assignee || item.owner || null,
                             noteId: noteId,
                         })),
                     });
@@ -234,6 +263,9 @@ export class NoteService {
             },
             include: {
                 actionItems: true,
+                workspace: {
+                    select: { name: true }
+                }
             },
             orderBy: {
                 createdAt: 'desc',

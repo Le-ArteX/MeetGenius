@@ -18,8 +18,11 @@ export class NoteController {
         @UploadedFile() file?: Express.Multer.File
     ) {
         let transcript = dto.transcript;
+        const logger = new (require('@nestjs/common').Logger)('NoteController');
 
         if (file) {
+            logger.log(`Received file: ${file.originalname}, size: ${file.size}, mimetype: ${file.mimetype}`);
+            
             const isAudio = file.mimetype.startsWith('audio/') || 
                             file.mimetype === 'video/webm' || 
                             file.originalname.match(/\.(mp3|wav|m4a|mp4|webm|ogg)$/i);
@@ -29,6 +32,8 @@ export class NoteController {
             } else {
                 transcript = await this.noteService.parseDocument(file);
             }
+        } else {
+            logger.warn('No file received in request');
         }
 
         if (!transcript && !dto.title) {

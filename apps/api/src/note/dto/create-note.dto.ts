@@ -11,4 +11,7 @@ export class CreateNoteDto {
   @IsOptional()
   @IsString()
   workspaceId?: string;
+
+  @IsOptional()
+  file?: any;
 }
