@@ -46,6 +46,30 @@ export class NoteService {
             }
         }
 
+        // --- ENFORCE PLAN LIMITS ---
+        const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+            select: { plan: true }
+        });
+
+        if (user?.plan === 'FREE') {
+            const startOfMonth = new Date();
+            startOfMonth.setDate(1);
+            startOfMonth.setHours(0, 0, 0, 0);
+
+            const noteCount = await this.prisma.note.count({
+                where: {
+                    userId,
+                    createdAt: { gte: startOfMonth }
+                }
+            });
+
+            if (noteCount >= 5) {
+                throw new ForbiddenException('Free plan limit reached (5 notes/month). Please upgrade to Pro for unlimited notes.');
+            }
+        }
+        // ---------------------------
+
         const note = await this.prisma.note.create({
             data: {
                 title: dto.title,
@@ -359,6 +383,13 @@ export class NoteService {
 
         return this.prisma.note.delete({
             where: { id },
+        });
+    }
+
+    async getUserPlan(userId: string) {
+        return this.prisma.user.findUnique({
+            where: { id: userId },
+            select: { plan: true }
         });
     }
 }

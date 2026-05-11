@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, Param, Delete, UseGuards, Query, UseInterceptors, UploadedFile, BadRequestException } from "@nestjs/common";
+import { Controller, Get, Post, Patch, Body, Param, Delete, UseGuards, Query, UseInterceptors, UploadedFile, BadRequestException, ForbiddenException } from "@nestjs/common";
 import { NoteService } from "./note.service";
 import { CreateNoteDto } from "./dto/create-note.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
@@ -21,6 +21,13 @@ export class NoteController {
         const logger = new (require('@nestjs/common').Logger)('NoteController');
 
         if (file) {
+            // --- ENFORCE PLAN LIMITS FOR FILE UPLOADS ---
+            const user = await this.noteService.getUserPlan(userId);
+            if (user?.plan === 'FREE') {
+                throw new ForbiddenException('File uploads are a Pro feature. Please upgrade to Pro to upload audio or documents.');
+            }
+            // --------------------------------------------
+
             logger.log(`Received file: ${file.originalname}, size: ${file.size}, mimetype: ${file.mimetype}`);
             
             const isAudio = file.mimetype.startsWith('audio/') || 
