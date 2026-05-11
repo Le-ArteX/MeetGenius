@@ -18,9 +18,8 @@ export default function Login() {
 
     const handleGoogleLogin = () => {
         setLoading(true);
-        setTimeout(() => {
-            router.push("/dashboard");
-        }, 1000);
+        // Redirect to the backend's Google auth route
+        window.location.href = "http://localhost:4000/auth/google";
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -31,7 +30,7 @@ export default function Login() {
         try {
             const data = await apiRequest<{ access_token: string, user: any }>('/auth/login', {
                 method: 'POST',
-                body: JSON.stringify({ email, password })
+                body: JSON.stringify({ email, password, rememberMe })
             });
 
             login(data.access_token, data.user);

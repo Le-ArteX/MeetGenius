@@ -170,6 +170,44 @@ export class AuthService {
     };
   }
 
+  async validateGoogleUser(googleUser: any) {
+    const { email, firstName, lastName, picture } = googleUser;
+    
+    let user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      // Create new user if they don't exist
+      // We set a random password because they are using Google
+      const randomPassword = Math.random().toString(36).slice(-12);
+      const hashedPassword = await bcrypt.hash(randomPassword, 10);
+      
+      user = await this.prisma.user.create({
+        data: {
+          email,
+          name: `${firstName} ${lastName}`.trim(),
+          avatarUrl: picture,
+          password: hashedPassword,
+          isVerified: true, // Google users are already verified
+        },
+      });
+    } else if (!user.isVerified) {
+        // If user existed but wasn't verified (e.g. registered with email but never verified), 
+        // verify them now because Google verified them
+        user = await this.prisma.user.update({
+            where: { id: user.id },
+            data: { isVerified: true }
+        });
+    }
+
+    const token = await this.generateToken(user.id, user.email, user.role);
+    return {
+      user,
+      access_token: token,
+    };
+  }
+
   async forgotPassword(dto: ForgotPasswordDto) {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },

@@ -8,5 +8,7 @@ export class LoginDto {
 
     @IsString()
     @IsNotEmpty({ message: 'Please enter your password' })
-    password: string
-}   
+    password: string;
+
+    rememberMe?: boolean;
+}
