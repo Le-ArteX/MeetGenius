@@ -16,13 +16,16 @@ export default function Logo({
     return (
         <div className={className}>
             <div className={`${iconSize} bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0`}>
-                <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg suppressHydrationWarning className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                     <path d="M8 10h.01"></path>
                     <path d="M12 10h.01"></path>
                     <path d="M16 10h.01"></path>
                 </svg>
             </div>
+            {showText && (
+                <span className={textClassName}>MeetGenius</span>
+            )}
         </div>
     );
 }

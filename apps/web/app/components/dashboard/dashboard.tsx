@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import DashboardTopbar from "./DashboardTopbar";
-import Logo from "../logo/logo";
 import DashboardSidebar, { SidebarLink } from "./DashboardSidebar";
+import Logo from "../logo/logo";
 import NoteCard, { NoteCardProps } from "./noteCard";
 import { apiRequest } from "../../lib/api";
 import { useAuth } from "../../context/AuthContext";
@@ -103,6 +103,7 @@ export default function Dashboard() {
         }}
         ctaLabel="+ Note"
         ctaHref="/dashboard/new"
+        logo={<Logo showText={false} iconSize="w-8 h-8" />}
         onSearch={(val) => setSearchQuery(val)}
         onMenuClick={() => setIsSidebarOpen(true)}
       />

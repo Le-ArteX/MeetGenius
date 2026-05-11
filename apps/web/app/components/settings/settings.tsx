@@ -124,7 +124,7 @@ export default function Settings() {
       <DashboardTopbar
         logoText="MeetGenius"
         logoHref="/dashboard"
-        logo={<Logo />}
+        logo={<Logo showText={false} iconSize="w-8 h-8" />}
         onMenuClick={() => setIsSidebarOpen(true)}
       />
 

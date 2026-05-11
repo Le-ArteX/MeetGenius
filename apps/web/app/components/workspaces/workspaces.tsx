@@ -369,7 +369,7 @@ export default function WorkspacesPage() {
             <DashboardTopbar 
                 logoText="MeetGenius" 
                 logoHref="/dashboard" 
-                logo={<Logo />} 
+                logo={<Logo showText={false} iconSize="w-8 h-8" />} 
                 onSearch={(val) => setSearchQuery(val)}
                 onMenuClick={() => setIsSidebarOpen(true)} 
             />

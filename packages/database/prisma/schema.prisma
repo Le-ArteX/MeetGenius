@@ -16,7 +16,8 @@ model User {
   id        String   @id @default(cuid())
   email     String   @unique
   password  String
-  avaterUrl String?
+  name      String?
+  avatarUrl String?
   isVerified Boolean  @default(false)
   plan       String   @default("FREE")
   role       AppRole  @default(USER)

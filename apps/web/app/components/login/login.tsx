@@ -62,7 +62,7 @@ export default function Login() {
                         type="button"
                         onClick={handleGoogleLogin}
                         className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-zinc-200 rounded-xl text-zinc-700 font-bold hover:bg-zinc-50 transition-all active:scale-[0.98] cursor-pointer">
-                        <svg className="w-5 h-5" viewBox="0 0 24 24">
+                        <svg suppressHydrationWarning className="w-5 h-5" viewBox="0 0 24 24">
                             <path
                                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                                 fill="#4285F4"
@@ -140,6 +140,7 @@ export default function Login() {
                                         className="peer appearance-none w-4 h-4 rounded border border-zinc-300 checked:bg-zinc-900 checked:border-zinc-900 transition-all cursor-pointer"
                                     />
                                     <svg 
+                                        suppressHydrationWarning
                                         className="absolute w-2.5 h-2.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" 
                                         fill="none" 
                                         viewBox="0 0 24 24" 

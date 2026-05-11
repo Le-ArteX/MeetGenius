@@ -141,7 +141,15 @@ export class WorkspaceService {
             token
         );
 
-        return { message: 'Invitation sent successfully', invitationId: invitation.id };
+        // LOG TO TERMINAL FOR LOCALHOST TESTING
+        const acceptUrl = `http://localhost:3000/workspaces/accept?token=${token}`;
+        this.logger.log('==================================================');
+        this.logger.log(`INVITATION SENT TO: ${dto.email}`);
+        this.logger.log(`WORKSPACE: ${workspace.name}`);
+        this.logger.log(`ACCEPT LINK: ${acceptUrl}`);
+        this.logger.log('==================================================');
+
+        return { message: 'Invitation sent successfully', invitationId: invitation.id, token };
     }
 
     async acceptInvitation(token: string, userId: string) {
@@ -188,7 +196,7 @@ export class WorkspaceService {
         await this.checkPermission(userId, workspaceId, ['OWNER', 'EDITOR', 'VIEWER']);
         return this.prisma.workspaceMember.findMany({
             where: { workspaceId },
-            include: { user: { select: { id: true, email: true, avaterUrl: true } } }
+            include: { user: { select: { id: true, email: true, avatarUrl: true } } }
         });
     }
 

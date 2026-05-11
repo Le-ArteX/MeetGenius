@@ -191,7 +191,7 @@ export default function NewNote() {
         logoHref="/dashboard"
         workspaceName="My Workspace"
         ctaLabel="+ Note"
-        logo={<Logo />}
+        logo={<Logo showText={false} iconSize="w-8 h-8" />}
       />
 
       <div className="flex flex-1 min-h-0">

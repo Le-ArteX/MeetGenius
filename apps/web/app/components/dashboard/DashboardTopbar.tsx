@@ -20,6 +20,7 @@ export interface DashboardTopbarProps {
   onCtaClick?: () => void;
   onSearch?: (value: string) => void;
   logo?: React.ReactNode;
+  brandLogo?: React.ReactNode;
   onMenuClick?: () => void;
 }
 
@@ -61,8 +62,12 @@ export default function DashboardTopbar(props: DashboardTopbarProps) {
           </svg>
         </button>
 
-        <Link href={props.logoHref} className="text-lg font-bold text-zinc-900 tracking-tight shrink-0">
-          {props.logoText}
+        <Link href={props.logoHref} className="flex items-center gap-2.5 shrink-0">
+          {props.brandLogo || (
+            <span className="text-lg font-bold text-zinc-900 tracking-tight">
+              {props.logoText}
+            </span>
+          )}
         </Link>
 
         {props.onSearch && (
@@ -141,9 +146,9 @@ export default function DashboardTopbar(props: DashboardTopbarProps) {
           ctaButton
         )}
         <div
-          className="w-8 h-8 rounded-full bg-zinc-900 text-white flex items-center justify-center text-sm font-semibold shrink-0 cursor-pointer hidden sm:flex"
+          className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 cursor-pointer hidden sm:flex overflow-hidden"
           onClick={() => { router.push(props.logoHref); }} >
-          <span className="text-[10px]">AI</span>
+          {props.logo}
         </div>
       </div>
     </header>
