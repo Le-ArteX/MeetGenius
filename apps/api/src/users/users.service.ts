@@ -11,10 +11,17 @@ export class UsersService {
         });
     }
 
-    async updateProfile(userId: string, data: { name?: string; email?: string }) {
+    async updateProfile(userId: string, data: { name?: string; email?: string; password?: string }) {
+        const updateData: any = { ...data };
+
+        if (data.password) {
+            const bcrypt = await import("bcrypt");
+            updateData.password = await bcrypt.hash(data.password, 10);
+        }
+
         return this.prisma.user.update({
             where: { id: userId },
-            data,
+            data: updateData,
         });
     }
 

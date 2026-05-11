@@ -24,6 +24,7 @@ export default function Settings() {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [pendingAvatar, setPendingAvatar] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -49,11 +50,16 @@ export default function Settings() {
     setSaved(false);
 
     try {
+      const body: any = { name, email };
+      if (password) body.password = password;
+      if (pendingAvatar) body.avatarUrl = pendingAvatar;
+
       const updated = await apiRequest("/users/profile", {
         method: "PATCH",
-        body: JSON.stringify({ name, email, password: password || undefined }),
+        body: JSON.stringify(body),
       });
       setUser(updated);
+      setPendingAvatar(null);
       setSaved(true);
       setPassword("");
       // Force refresh auth context if needed or just let it be
@@ -61,6 +67,7 @@ export default function Settings() {
       setError(err.message || "Failed to update profile");
     } finally {
       setSaving(false);
+      setTimeout(() => setSaved(false), 3000);
     }
   };
 
@@ -72,21 +79,18 @@ export default function Settings() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      setSaving(true);
-      const response = await api.post("/users/avatar", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      setUser({ ...user, avatarUrl: response.data.avatarUrl });
-      setSaved(true);
-    } catch (err: any) {
-      alert(err.response?.data?.message || "Failed to upload image");
-    } finally {
-      setSaving(false);
+    if (file.size > 2 * 1024 * 1024) {
+      setError("File size must be less than 2MB");
+      return;
     }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPendingAvatar(reader.result as string);
+      setSaved(false);
+      setError(null);
+    };
+    reader.readAsDataURL(file);
   };
 
   const sidebarUser = user ? { name: user.name || user.email.split("@")[0], email: user.email, avatarUrl: user.avatarUrl || undefined } : undefined;
@@ -148,7 +152,9 @@ export default function Settings() {
                 <div className="flex items-center gap-6 mb-8 pb-8 border-b border-zinc-100">
                   <div className="relative group cursor-pointer" onClick={handleAvatarClick}>
                     <div className="w-20 h-20 bg-zinc-900 rounded-full flex items-center justify-center shrink-0 shadow-lg border-4 border-white overflow-hidden">
-                      {user?.avatarUrl ? (
+                      {pendingAvatar ? (
+                        <img src={pendingAvatar} alt="Preview" className="w-full h-full object-cover" />
+                      ) : user?.avatarUrl ? (
                         <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                       ) : (
                         <span className="text-white font-bold text-2xl">
@@ -165,7 +171,14 @@ export default function Settings() {
                   </div>
                   <div>
                     <h2 className="text-lg font-bold text-zinc-900">{user?.name || "User"}</h2>
-                    <p className="text-sm text-zinc-500">{user?.email}</p>
+                    <p className="text-sm text-zinc-500 mb-3">{user?.email}</p>
+                    <button 
+                      type="button"
+                      onClick={handleAvatarClick}
+                      className="text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                    >
+                      Change Photo
+                    </button>
                     <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
                   </div>
                 </div>

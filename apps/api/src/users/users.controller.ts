@@ -17,7 +17,7 @@ export class UsersController {
     @Patch('profile')
     async updateProfile(
         @CurrentUser('id') userId: string,
-        @Body() data: { name?: string; email?: string }
+        @Body() data: { name?: string; email?: string; password?: string }
     ) {
         return this.usersService.updateProfile(userId, data);
     }
@@ -35,11 +35,12 @@ export class UsersController {
             }),
         ) file: Express.Multer.File,
     ) {
+        // Convert to base64 to avoid local filesystem serving issues in dev
+        const base64 = file.buffer.toString('base64');
+        const dataUrl = `data:${file.mimetype};base64,${base64}`;
 
-        const mockUrl = `https://ui-avatars.com/api/?name=${userId}&background=random`;
+        await this.usersService.updateAvatar(userId, dataUrl);
 
-        await this.usersService.updateAvatar(userId, mockUrl);
-
-        return { avatarUrl: mockUrl };
+        return { avatarUrl: dataUrl };
     }
 }
