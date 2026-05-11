@@ -34,23 +34,42 @@ export class WorkspaceService {
         });
     }
 
-    async findAll(userId: string) {
-        return this.prisma.workspace.findMany({
-            where: {
-                members: {
-                    some: { userId }
-                }
-            },
-            include: {
-                members: {
-                    where: { userId },
-                    select: { role: true },
-                },
-                _count: {
-                    select: { notes: true, members: true }
-                }
+    async findAll(userId: string, page: number = 1, limit: number = 10) {
+        const skip = (page - 1) * limit;
+        const where = {
+            members: {
+                some: { userId }
             }
-        });
+        };
+
+        const [data, total] = await Promise.all([
+            this.prisma.workspace.findMany({
+                where,
+                include: {
+                    members: {
+                        where: { userId },
+                        select: { role: true },
+                    },
+                    _count: {
+                        select: { notes: true, members: true }
+                    }
+                },
+                orderBy: {
+                    createdAt: 'desc',
+                },
+                skip,
+                take: limit,
+            }),
+            this.prisma.workspace.count({ where }),
+        ]);
+
+        return {
+            data,
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
+        };
     }
 
     async update(userId: string, id: string, dto: UpdateWorkspaceDto) {

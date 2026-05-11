@@ -15,8 +15,16 @@ export class WorkspaceController {
     }
 
     @Get()
-    findAll(@CurrentUser('id') userId: string) {
-        return this.workspaceService.findAll(userId);
+    findAll(
+        @CurrentUser('id') userId: string,
+        @Query('page') page?: string,
+        @Query('limit') limit?: string
+    ) {
+        return this.workspaceService.findAll(
+            userId,
+            page ? parseInt(page) : 1,
+            limit ? parseInt(limit) : 10
+        );
     }
 
     @Patch(':id')

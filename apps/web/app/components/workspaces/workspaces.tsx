@@ -226,11 +226,19 @@ export default function WorkspacesPage() {
 
     const showToast = (message: string, type: "success" | "error" = "success") => setToast({ message, type });
 
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalWorkspaces, setTotalWorkspaces] = useState(0);
+
     // Fetch workspaces
-    const fetchWorkspaces = useCallback(async () => {
+    const fetchWorkspaces = useCallback(async (page: number) => {
         try {
-            const data = await apiRequest<Workspace[]>("/workspaces");
+            const response = await apiRequest<any>(`/workspaces?page=${page}&limit=10`);
+            const { data, total, totalPages: totalP } = response;
             setWorkspaces(data);
+            setTotalPages(totalP);
+            setTotalWorkspaces(total);
         } catch (err: any) {
             showToast(err.message || "Failed to load workspaces", "error");
         } finally {
@@ -238,7 +246,7 @@ export default function WorkspacesPage() {
         }
     }, []);
 
-    useEffect(() => { fetchWorkspaces(); }, [fetchWorkspaces]);
+    useEffect(() => { fetchWorkspaces(currentPage); }, [fetchWorkspaces, currentPage]);
 
     // Fetch members when expanding
     const handleExpand = async (id: string) => {
@@ -268,7 +276,11 @@ export default function WorkspacesPage() {
             await apiRequest("/workspaces", { method: "POST", body: JSON.stringify({ name: newWorkspaceName.trim() }) });
             setNewWorkspaceName("");
             showToast("Workspace created!");
-            await fetchWorkspaces();
+            if (currentPage === 1) {
+                await fetchWorkspaces(1);
+            } else {
+                setCurrentPage(1);
+            }
         } catch (err: any) {
             showToast(err.message || "Failed to create workspace", "error");
         } finally {
@@ -282,7 +294,7 @@ export default function WorkspacesPage() {
             await apiRequest(`/workspaces/${id}`, { method: "DELETE" });
             showToast("Workspace deleted");
             if (expandedId === id) setExpandedId(null);
-            await fetchWorkspaces();
+            await fetchWorkspaces(currentPage);
         } catch (err: any) {
             showToast(err.message || "Failed to delete workspace", "error");
         }
@@ -334,12 +346,19 @@ export default function WorkspacesPage() {
                 ...prev,
                 [workspaceId]: (prev[workspaceId] || []).filter(m => m.userId !== targetUserId),
             }));
-            await fetchWorkspaces();
+            await fetchWorkspaces(currentPage);
             showToast("Member removed");
         } catch (err: any) {
             showToast(err.message || "Failed to remove member", "error");
         }
     };
+
+    // Search state
+    const [searchQuery, setSearchQuery] = useState("");
+
+    const filteredWorkspaces = workspaces.filter(ws => 
+        ws.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     const sidebarUser = user ? { name: user.email.split("@")[0] || user.email, email: user.email, avatarUrl: user.avatarUrl || undefined } : undefined;
 
@@ -347,31 +366,42 @@ export default function WorkspacesPage() {
         <div className="h-screen flex flex-col bg-white">
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
-            <DashboardTopbar logoText="MeetGenius" logoHref="/dashboard" logo={<Logo />} onMenuClick={() => setIsSidebarOpen(true)} />
+            <DashboardTopbar 
+                logoText="MeetGenius" 
+                logoHref="/dashboard" 
+                logo={<Logo />} 
+                onSearch={(val) => setSearchQuery(val)}
+                onMenuClick={() => setIsSidebarOpen(true)} 
+            />
 
             <div className="flex flex-1 min-h-0">
                 <DashboardSidebar links={sidebarLinks} activeLinkId="workspaces" user={sidebarUser} isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
                 <main className="flex-1 overflow-y-auto px-4 md:px-6 py-8 bg-zinc-50/30">
-                    <div className="w-full max-w-3xl">
-                        <h1 className="text-3xl font-bold text-zinc-900 mb-8">Workspaces</h1>
+                    <div className="w-full max-w-5xl mx-auto">
+                        <div className="flex items-center justify-between mb-8">
+                            <h1 className="text-3xl font-bold text-zinc-900">Workspaces</h1>
+                            <div className="text-sm text-zinc-500">
+                                Total: <span className="font-semibold text-zinc-900">{totalWorkspaces}</span>
+                            </div>
+                        </div>
 
                         {/* Create New Workspace */}
-                        <div className="border border-zinc-200 rounded-xl px-5 py-4 mb-4 bg-white">
-                            <h3 className="text-sm font-semibold text-zinc-700 mb-3">Create new workspace</h3>
+                        <div className="border border-zinc-200 rounded-2xl px-6 py-5 mb-8 bg-white shadow-sm">
+                            <h3 className="text-sm font-bold text-zinc-800 mb-4 tracking-tight">Create New Workspace</h3>
                             <div className="flex items-center gap-3">
                                 <input
                                     type="text"
                                     value={newWorkspaceName}
                                     onChange={(e) => setNewWorkspaceName(e.target.value)}
-                                    placeholder="e.g. Product Team"
+                                    placeholder="e.g. Engineering Team"
                                     onKeyDown={(e) => e.key === "Enter" && handleCreate()}
-                                    className="flex-1 px-3 py-2 border border-zinc-200 rounded-lg text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 bg-white"
+                                    className="flex-1 px-4 py-2.5 border border-zinc-200 rounded-xl text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/5 bg-zinc-50/50 transition-all"
                                 />
                                 <button
                                     onClick={handleCreate}
                                     disabled={createLoading}
-                                    className="px-5 py-2 bg-zinc-900 text-white text-sm font-semibold rounded-lg hover:bg-zinc-800 transition-colors shrink-0 cursor-pointer disabled:opacity-50"
+                                    className="px-6 py-2.5 bg-zinc-900 text-white text-sm font-bold rounded-xl hover:bg-zinc-800 transition-all shrink-0 cursor-pointer disabled:opacity-50 active:scale-95"
                                 >
                                     {createLoading ? "Creating..." : "Create"}
                                 </button>
@@ -380,35 +410,76 @@ export default function WorkspacesPage() {
 
                         {/* Workspace List */}
                         {loading ? (
-                            <div className="flex items-center justify-center py-16">
+                            <div className="flex items-center justify-center py-20">
                                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-900"></div>
                             </div>
-                        ) : workspaces.length === 0 ? (
-                            <div className="text-center py-16">
-                                <p className="text-zinc-400 text-sm">No workspaces yet. Create one above to get started!</p>
+                        ) : filteredWorkspaces.length === 0 ? (
+                            <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-zinc-200">
+                                <p className="text-zinc-400 text-sm">
+                                    {searchQuery ? `No workspaces found matching "${searchQuery}"` : "No workspaces yet. Create one above to get started!"}
+                                </p>
                             </div>
                         ) : (
-                            <div className="flex flex-col gap-3 mb-6">
-                                {workspaces.map((ws) => (
-                                    <WorkspaceCard
-                                        key={ws.id}
-                                        workspace={ws}
-                                        currentUserId={user?.id || ""}
-                                        onDelete={handleDelete}
-                                        onExpand={handleExpand}
-                                        isExpanded={expandedId === ws.id}
-                                        members={members[ws.id] || []}
-                                        membersLoading={membersLoading[ws.id] || false}
-                                        onRoleChange={handleRoleChange}
-                                        onRemoveMember={handleRemoveMember}
-                                        inviteEmail={inviteEmail}
-                                        setInviteEmail={setInviteEmail}
-                                        inviteRole={inviteRole}
-                                        setInviteRole={setInviteRole}
-                                        onInvite={handleInvite}
-                                        inviteLoading={inviteLoading}
-                                    />
-                                ))}
+                            <div className="space-y-6">
+                                <div className="flex flex-col gap-3">
+                                    {filteredWorkspaces.map((ws) => (
+                                        <WorkspaceCard
+                                            key={ws.id}
+                                            workspace={ws}
+                                            currentUserId={user?.id || ""}
+                                            onDelete={handleDelete}
+                                            onExpand={handleExpand}
+                                            isExpanded={expandedId === ws.id}
+                                            members={members[ws.id] || []}
+                                            membersLoading={membersLoading[ws.id] || false}
+                                            onRoleChange={handleRoleChange}
+                                            onRemoveMember={handleRemoveMember}
+                                            inviteEmail={inviteEmail}
+                                            setInviteEmail={setInviteEmail}
+                                            inviteRole={inviteRole}
+                                            setInviteRole={setInviteRole}
+                                            onInvite={handleInvite}
+                                            inviteLoading={inviteLoading}
+                                        />
+                                    ))}
+                                </div>
+
+                                {/* Pagination Controls */}
+                                {totalPages > 1 && (
+                                    <div className="flex items-center justify-between pt-6 border-t border-zinc-200">
+                                        <button
+                                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                            disabled={currentPage === 1}
+                                            className="px-4 py-2 text-sm font-medium text-zinc-600 bg-white border border-zinc-200 rounded-xl hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                        >
+                                            Previous
+                                        </button>
+                                        
+                                        <div className="flex items-center gap-2">
+                                            {[...Array(totalPages)].map((_, i) => (
+                                                <button
+                                                    key={i + 1}
+                                                    onClick={() => setCurrentPage(i + 1)}
+                                                    className={`w-10 h-10 flex items-center justify-center rounded-xl text-sm font-bold transition-all ${
+                                                        currentPage === i + 1 
+                                                            ? "bg-zinc-900 text-white shadow-lg shadow-zinc-200" 
+                                                            : "text-zinc-500 hover:bg-zinc-100"
+                                                    }`}
+                                                >
+                                                    {i + 1}
+                                                </button>
+                                            ))}
+                                        </div>
+
+                                        <button
+                                            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                            disabled={currentPage === totalPages}
+                                            className="px-4 py-2 text-sm font-medium text-zinc-600 bg-white border border-zinc-200 rounded-xl hover:bg-zinc-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                        >
+                                            Next
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
