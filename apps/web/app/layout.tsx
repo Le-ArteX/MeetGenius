@@ -19,6 +19,9 @@ export const metadata: Metadata = {
 
 import { AuthProvider } from "./context/AuthContext";
 import CookieConsent from "./components/ui/cookie-consent";
+import { ShortcutOverlay } from "./components/ui/ShortcutOverlay";
+import { GlobalShortcutHandler } from "./components/ui/GlobalShortcutHandler";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -30,6 +33,8 @@ export default function RootLayout({
         <AuthProvider>
           {children}
           <CookieConsent />
+          <ShortcutOverlay />
+          <GlobalShortcutHandler />
         </AuthProvider>
       </body>
     </html>

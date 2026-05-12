@@ -56,8 +56,15 @@ export async function apiRequest<T = any>(endpoint: string, options: any = {}): 
       data: error.response?.data,
       message: error.message
     });
-    const message = error.response?.data?.message || "Something went wrong";
-    throw new Error(message);
+    const status = error.response?.status;
+    const backendMessage = error.response?.data?.message;
+    const message = backendMessage || error.message || "Something went wrong";
+    
+    const detailedError = status 
+      ? `API Error ${status}: ${message}`
+      : `Network Error: ${message}`;
+      
+    throw new Error(detailedError);
   }
 }
 

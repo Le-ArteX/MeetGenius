@@ -31,6 +31,7 @@ export default function SearchBar({ placeholder = "Search notes...", onSearch }:
         </div>
         
         <input
+          id="global-search-input"
           type="text"
           value={value}
           onChange={handleChange}

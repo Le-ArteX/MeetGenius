@@ -14,7 +14,7 @@ export class WorkspaceService {
     ) { }
 
     async create(userId: string, dto: CreateWorkspaceDto) {
-        // --- ENFORCE PLAN LIMITS ---
+
         const user = await this.prisma.user.findUnique({
             where: { id: userId },
             select: { plan: true }
@@ -31,7 +31,7 @@ export class WorkspaceService {
                 throw new ForbiddenException(`${user?.plan || 'FREE'} plan limit reached (${limit} workspaces). Please upgrade for more workspaces.`);
             }
         }
-        // ---------------------------
+
 
         return this.prisma.$transaction(async (tx) => {
             const workspace = await tx.workspace.create({
