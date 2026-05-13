@@ -9,7 +9,7 @@ export default function CareersPage() {
     return (
         <div className="min-h-screen bg-white flex flex-col">
             <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-zinc-100 py-4 px-6 flex justify-between items-center">
-                <Link href="/landingPage">
+                <Link href="/">
                     <Logo />
                 </Link>
                 <Link href="/register" className="px-4 py-2 bg-zinc-900 text-white rounded-xl text-sm font-bold hover:bg-zinc-800 transition-all">
@@ -27,8 +27,8 @@ export default function CareersPage() {
 
                 <div className="space-y-6">
                     <h2 className="text-2xl font-bold text-zinc-900 mb-8">Open Positions</h2>
-                    
-                    {/* Placeholder Job 1 */}
+
+
                     <div className="p-8 rounded-3xl border border-zinc-200 hover:border-zinc-900 transition-all cursor-pointer group">
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
@@ -41,7 +41,7 @@ export default function CareersPage() {
                         </div>
                     </div>
 
-                    {/* Placeholder Job 2 */}
+
                     <div className="p-8 rounded-3xl border border-zinc-200 hover:border-zinc-900 transition-all cursor-pointer group">
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
@@ -54,7 +54,7 @@ export default function CareersPage() {
                         </div>
                     </div>
 
-                    {/* Placeholder Job 3 */}
+
                     <div className="p-8 rounded-3xl border border-zinc-200 hover:border-zinc-900 transition-all cursor-pointer group">
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
@@ -69,7 +69,7 @@ export default function CareersPage() {
 
                     <h2 className="text-2xl font-bold text-zinc-900 pt-12 mb-8">Internships</h2>
 
-                    {/* Internship 1 */}
+
                     <div className="p-8 rounded-3xl border border-zinc-200 hover:border-zinc-900 transition-all cursor-pointer group">
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
@@ -82,7 +82,7 @@ export default function CareersPage() {
                         </div>
                     </div>
 
-                    {/* Internship 2 */}
+
                     <div className="p-8 rounded-3xl border border-zinc-200 hover:border-zinc-900 transition-all cursor-pointer group">
                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>

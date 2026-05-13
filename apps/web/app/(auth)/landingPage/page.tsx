@@ -6,8 +6,6 @@ import About, { type AboutProps } from "../../components/about/about";
 import Contact from "../../components/contact/contact";
 import Footer from "../../components/footer/footer";
 
-
-
 const navProps: NavProps = {
   logoText: "MeetGenius",
   logoHref: "/landingPage",
@@ -58,7 +56,6 @@ const featureProps: FeatureProps = {
 };
 
 const pricingProps: PriceProps = {
-
   plans: [
     {
       name: "Free",

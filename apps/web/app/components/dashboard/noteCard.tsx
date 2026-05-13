@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next/navigation";
 
 export interface NoteCardProps {
     id: string;
@@ -11,9 +12,16 @@ export interface NoteCardProps {
 }
 
 export default function NoteCard({ id, title, preview, date, actionCount, workspaceName, onClick }: NoteCardProps) {
+    const router = useRouter();
     return (
         <div
-            onClick={() => onClick?.(id)}
+            onClick={() => {
+                if (onClick) {
+                    onClick(id);
+                } else {
+                    router.push(`/dashboard/${id}`);
+                }
+            }}
             className="w-full flex items-center justify-between px-6 py-5 border border-zinc-200 rounded-xl bg-white hover:border-zinc-300 hover:shadow-sm transition-all duration-150 cursor-pointer group"
         >
             <div className="flex flex-col gap-1.5 flex-1 min-w-0 mr-8">

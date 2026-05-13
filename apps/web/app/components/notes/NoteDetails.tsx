@@ -9,7 +9,7 @@ import Logo from "../logo/logo";
 import { apiRequest } from "../../lib/api";
 import DeleteModal from "../ui/DeleteModal";
 
-const ShareDropdown = dynamic(() => import("../ui/ShareModal"), { 
+const ShareDropdown = dynamic(() => import("../ui/ShareModal"), {
   ssr: false,
   loading: () => <button className="px-4 py-2 text-sm font-medium text-zinc-400">Share</button>
 });
@@ -23,8 +23,9 @@ const sidebarLinks: SidebarLink[] = [
   { id: "settings", label: "Settings", href: "/dashboard/settings", icon: "settings" },
 ];
 
-export default function NoteDetails() {
-  const { id } = useParams();
+export default function NoteDetails({ noteId }: { noteId?: string }) {
+  const { slug, id: directId } = useParams();
+  const id = noteId || directId || (Array.isArray(slug) ? slug[0] : slug);
   const router = useRouter();
   const { user } = useAuth();
 
@@ -68,6 +69,16 @@ export default function NoteDetails() {
     }
   }, [id]);
 
+  useEffect(() => {
+    if (error || (!loading && !note)) {
+      // Automatically redirect to main dashboard if note is not found
+      const timer = setTimeout(() => {
+        router.push("/dashboard");
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [error, note, loading, router]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-zinc-50">
@@ -80,6 +91,7 @@ export default function NoteDetails() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-zinc-50 flex-col space-y-4">
         <h2 className="text-xl font-bold text-zinc-900">{error || "Note not found"}</h2>
+        <p className="text-zinc-500">Returning you to dashboard...</p>
         <button onClick={() => router.push("/dashboard")} className="text-blue-600 hover:underline">
           Return to Dashboard
         </button>

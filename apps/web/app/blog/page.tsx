@@ -9,7 +9,7 @@ export default function BlogPage() {
     return (
         <div className="min-h-screen bg-white flex flex-col">
             <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-zinc-100 py-4 px-6 flex justify-between items-center">
-                <Link href="/landingPage">
+                <Link href="/">
                     <Logo />
                 </Link>
                 <div className="flex gap-6 items-center">
@@ -31,7 +31,6 @@ export default function BlogPage() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {/* Placeholder Post 1 */}
                     <div className="group cursor-pointer">
                         <div className="aspect-video bg-zinc-100 rounded-3xl mb-6 overflow-hidden border border-zinc-200">
                             <div className="w-full h-full bg-linear-to-br from-blue-500/10 to-indigo-500/10 flex items-center justify-center">
@@ -46,7 +45,6 @@ export default function BlogPage() {
                         </p>
                     </div>
 
-                    {/* Placeholder Post 2 */}
                     <div className="group cursor-pointer">
                         <div className="aspect-video bg-zinc-100 rounded-3xl mb-6 overflow-hidden border border-zinc-200">
                             <div className="w-full h-full bg-linear-to-br from-purple-500/10 to-pink-500/10 flex items-center justify-center">

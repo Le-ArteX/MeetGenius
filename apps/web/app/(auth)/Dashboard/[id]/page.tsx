@@ -1,12 +1,11 @@
+"use client";
+
+import { useParams } from "next/navigation";
 import NoteDetails from "../../../components/notes/NoteDetails";
 
-type props = {
-    params: Promise<{ id: string }>
-}
+export default function Page() {
+  const { id } = useParams();
+  const noteId = Array.isArray(id) ? id[0] : id;
 
-export default async function Page({ params }: props) {
-    const { id } = await params;
-    return (
-        <NoteDetails />
-    )
+  return <NoteDetails noteId={noteId} />;
 }

@@ -9,7 +9,7 @@ export class WorkspaceRoleGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
     private prisma: PrismaService,
-  ) {}
+  ) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
@@ -23,11 +23,11 @@ export class WorkspaceRoleGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest();
     const userId = request.user?.id;
-    
+
     // Attempt to find workspaceId in params, query, or body
-    const workspaceId = 
-      request.params.workspaceId || 
-      request.query.workspaceId || 
+    const workspaceId =
+      request.params.workspaceId ||
+      request.query.workspaceId ||
       request.body.workspaceId;
 
     if (!userId) {
@@ -35,9 +35,8 @@ export class WorkspaceRoleGuard implements CanActivate {
     }
 
     if (!workspaceId) {
-      // If no workspaceId is provided, we can't check workspace roles.
-      // You might want to allow this or throw an error depending on your logic.
-      return true; 
+
+      return true;
     }
 
     const membership = await this.prisma.workspaceMember.findUnique({

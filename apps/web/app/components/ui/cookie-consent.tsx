@@ -7,10 +7,8 @@ export default function CookieConsent() {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    // Only show if the user hasn't made a choice yet
     const consent = localStorage.getItem('cookie_consent');
     if (!consent) {
-      // Add a slight delay so it doesn't pop up aggressively the exact millisecond the page loads
       const timer = setTimeout(() => setShow(true), 1000);
       return () => clearTimeout(timer);
     }

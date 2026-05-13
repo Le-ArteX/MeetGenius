@@ -128,65 +128,59 @@ export default function Dashboard() {
           onClose={() => setIsSidebarOpen(false)}
         />
         <main className="flex-1 overflow-y-auto px-4 md:px-6 py-8 bg-zinc-50/30">
-          <div className="max-w-5xl mx-auto">
-            <div className="flex flex-col gap-6 mb-8">
-              <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold text-zinc-900 tracking-tight">Notes</h1>
-                <div className="text-sm text-zinc-500 font-medium">
-                  Total: <span className="font-bold text-zinc-900">{totalNotes}</span> notes
-                </div>
+          <div className="max-w-5xl mx-auto flex flex-col gap-8">
+            <div className="flex items-center justify-between">
+              <h1 className="text-3xl font-bold text-zinc-900 tracking-tight">Notes</h1>
+              <div className="text-sm text-zinc-500 font-medium">
+                Total: <span className="font-bold text-zinc-900">{totalNotes}</span> notes
               </div>
-
-              {usage && (
-                <div className="bg-white p-6 rounded-2xl border border-zinc-100 shadow-sm transition-all hover:shadow-md">
-                  <div className="flex justify-between items-center mb-3">
-                    <span className="text-sm font-bold text-zinc-600">Notes used this month</span>
-                    <span className="text-sm font-black text-zinc-900 bg-zinc-100 px-3 py-1 rounded-full uppercase tracking-tighter">
-                      {usage.count} / {usage.limit === 999999 ? "∞" : usage.limit}
-                    </span>
-                  </div>
-                  <div className="w-full bg-zinc-100 h-2.5 rounded-full overflow-hidden">
-                    <div 
-                      className={`h-full transition-all duration-1000 ease-out ${
-                        (usage.count / usage.limit) >= 0.8 ? "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]" : "bg-zinc-900"
-                      }`}
-                      style={{ width: `${Math.min(100, (usage.count / usage.limit) * 100)}%` }}
-                    />
-                  </div>
-                  {(usage.count / usage.limit) >= 0.8 && (
-                    <div className="mt-4 flex items-center justify-between animate-in fade-in slide-in-from-top-1 duration-500">
-                      <p className="text-xs font-bold text-red-600 flex items-center gap-1.5">
-                        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                          <path d="M12 9v4M12 17h.01M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18z" />
-                        </svg>
-                        You're almost at your limit.
-                      </p>
-                      <Link href="/dashboard/billing" className="text-xs font-black text-zinc-900 underline hover:text-zinc-600 transition-all uppercase tracking-tighter">
-                        Upgrade for more →
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
+
+            {usage && (
+              <div className="bg-white p-6 rounded-2xl border border-zinc-100 shadow-sm transition-all hover:shadow-md">
+                <div className="flex justify-between items-center mb-3">
+                  <span className="text-sm font-bold text-zinc-600">Notes used this month</span>
+                  <span className="text-sm font-black text-zinc-900 bg-zinc-100 px-3 py-1 rounded-full uppercase tracking-tighter">
+                    {usage.count} / {usage.limit === 999999 ? "∞" : usage.limit}
+                  </span>
+                </div>
+                <div className="w-full bg-zinc-100 h-2.5 rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full transition-all duration-1000 ease-out ${
+                      (usage.count / usage.limit) >= 0.8 ? "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]" : "bg-zinc-900"
+                    }`}
+                    style={{ width: `${Math.min(100, (usage.count / usage.limit) * 100)}%` }}
+                  />
+                </div>
+                {(usage.count / usage.limit) >= 0.8 && (
+                  <div className="mt-4 flex items-center justify-between animate-in fade-in slide-in-from-top-1 duration-500">
+                    <p className="text-xs font-bold text-red-600 flex items-center gap-1.5">
+                      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                        <path d="M12 9v4M12 17h.01M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18z" />
+                      </svg>
+                      You're almost at your limit.
+                    </p>
+                    <Link href="/dashboard/billing" className="text-xs font-black text-zinc-900 underline hover:text-zinc-600 transition-all uppercase tracking-tighter">
+                      Upgrade for more →
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
 
             {loading ? (
               <div className="flex items-center justify-center py-20">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-900"></div>
               </div>
             ) : notes.length > 0 ? (
-              <div className="space-y-6">
-                <div className="flex flex-col gap-4 w-full">
-                  {filteredNotes.map((note) => (
-                    <Link href={`/dashboard/${note.id}`} key={note.id}>
-                      <NoteCard {...note} />
-                    </Link>
-                  ))}
-                </div>
+              <div className="flex flex-col gap-6 w-full pb-10">
+                {filteredNotes.map((note) => (
+                  <NoteCard key={note.id} {...note} />
+                ))}
 
                 {/* Pagination Controls */}
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-between pt-6 border-t border-zinc-200">
+                  <div className="flex items-center justify-between pt-6 border-t border-zinc-200 mt-4">
                     <button
                       onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                       disabled={currentPage === 1}

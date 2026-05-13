@@ -86,7 +86,7 @@ function ResetPasswordContent() {
         <div className="min-h-screen flex items-center justify-center bg-zinc-50 px-4 py-12">
             <div className="max-w-md w-full bg-white rounded-3xl border border-zinc-200 shadow-xl p-8 space-y-8">
                 <div className="flex flex-col items-center text-center space-y-4">
-                    <Link href="/login">
+                    <Link href="/">
                         <Logo />
                     </Link>
                     <div className="space-y-1">

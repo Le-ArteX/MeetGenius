@@ -1,19 +1,37 @@
+'use client';
+
 import React from "react";
 import Link from "next/link";
 
 export default function Footer() {
+    const [email, setEmail] = React.useState("");
+    const [status, setStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
+
+    const handleSubscribe = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!email) return;
+
+        setStatus("loading");
+        // API call
+        setTimeout(() => {
+            setStatus("success");
+            setEmail("");
+            setTimeout(() => setStatus("idle"), 5000);
+        }, 1500);
+    };
+
     return (
         <footer className="bg-zinc-900 text-zinc-400 py-16 border-t border-zinc-800">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
                     <div className="col-span-1 md:col-span-1">
-                        <Link href="/landingPage" className="text-white text-2xl font-bold flex items-center gap-3 mb-6">
+                        <Link href="/" className="text-white text-2xl font-bold flex items-center gap-3 mb-6">
                             <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
                                 <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                                    <path d="M8 10h.01"></path>
-                                    <path d="M12 10h.01"></path>
-                                    <path d="M16 10h.01"></path>
+                                    <circle cx="9" cy="10" r="1" fill="currentColor" stroke="none"></circle>
+                                    <circle cx="12" cy="10" r="1" fill="currentColor" stroke="none"></circle>
+                                    <circle cx="15" cy="10" r="1" fill="currentColor" stroke="none"></circle>
                                 </svg>
                             </div>
                             MeetGenius
@@ -22,7 +40,6 @@ export default function Footer() {
                             Making meetings more productive with AI-driven insights, automated summaries, and clear action items.
                         </p>
                         <div className="flex gap-4">
-                            {/* Social icons placeholders */}
                             <a
                                 href="https://x.com/"
                                 target="_blank"
@@ -79,16 +96,36 @@ export default function Footer() {
                     <div>
                         <h4 className="text-white font-bold mb-6">Newsletter</h4>
                         <p className="text-sm mb-6">Stay updated with the latest AI meeting tips.</p>
-                        <div className="flex gap-2">
-                            <input
-                                type="email"
-                                placeholder="Your email"
-                                className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 w-full"
-                            />
-                            <button className="bg-blue-500 text-white p-2 rounded-xl hover:bg-blue-600 transition-colors">
-                                →
-                            </button>
-                        </div>
+                        <form onSubmit={handleSubscribe} className="space-y-3">
+                            <div className="flex gap-2">
+                                <input
+                                    type="email"
+                                    required
+                                    placeholder="Your email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    disabled={status === "loading" || status === "success"}
+                                    className="bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 w-full disabled:opacity-50"
+                                />
+                                <button
+                                    type="submit"
+                                    disabled={status === "loading" || status === "success"}
+                                    className="bg-blue-500 text-white p-2 rounded-xl hover:bg-blue-600 transition-colors disabled:opacity-50 min-w-[40px] flex items-center justify-center">
+                                    {status === "loading" ? (
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    ) : status === "success" ? (
+                                        "✓"
+                                    ) : (
+                                        "→"
+                                    )}
+                                </button>
+                            </div>
+                            {status === "success" && (
+                                <p className="text-xs text-green-400 font-medium animate-in fade-in slide-in-from-top-1">
+                                    Thanks for subscribing!
+                                </p>
+                            )}
+                        </form>
                     </div>
                 </div>
 

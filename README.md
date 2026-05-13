@@ -1,159 +1,183 @@
-# Turborepo starter
+# MeetGenius 🎙️✨
 
-This Turborepo starter is maintained by the Turborepo core team.
+**The AI-Powered Meeting OS for Modern Teams.**
 
-## Using this example
+MeetGenius transforms the way teams document, analyze, and act on their conversations. By combining high-speed AI inference with seamless workspace collaboration, MeetGenius turns messy meeting transcripts into actionable intelligence.
 
-Run the following command:
+---
 
-```sh
-npx create-turbo@latest
+## 🌟 Platform Capabilities
+
+### 🧠 Intelligent Analysis
+- **AI Summarization**: Powered by **Groq (Llama 3.3 70B)**, generating comprehensive summaries, key decisions, and context-aware insights in milliseconds.
+- **Deep Action Extraction**: Automatically identifies tasks and assignees from spoken conversation.
+- **Multi-Source Ingestion**:
+  - **Audio Transcription**: High-fidelity speech-to-text via **Groq Whisper v3**.
+  - **Document Parsing**: Intelligent text extraction from PDF, DOCX, and TXT files.
+  - **Direct Import**: Paste transcripts directly into the editor.
+
+### 👥 Team Collaboration
+- **Dynamic Workspaces**: Create shared environments for teams or projects.
+- **Role-Based Access Control (RBAC)**: Manage permissions with `OWNER`, `EDITOR`, and `VIEWER` roles.
+- **Invitation System**: Secure, token-based email invitations powered by **Brevo**.
+
+### 💳 SaaS Infrastructure
+- **Tiered Subscriptions**: Managed via **Lemon Squeezy**, supporting Free, Pro, and Enterprise tiers.
+- **Real-time Billing Sync**: Automated plan provisioning through secure webhook integration.
+- **Usage Enforcement**: Intelligent limits based on user plans (e.g., 5 notes/month for Free users).
+
+---
+
+## 🛠️ Technical Architecture
+
+MeetGenius is a high-performance **Turborepo** monorepo designed for scale and developer experience.
+
+- **Backend**: [NestJS](https://nestjs.com/) (Node.js) with [Prisma ORM](https://www.prisma.io/) and PostgreSQL.
+- **Frontend**: [Next.js 15](https://nextjs.org/) (React 19) with Tailwind CSS.
+- **AI Pipeline**: Custom Groq integration for Llama 3.3 and Whisper v3.
+- **Email**: Brevo SMTP API for high-deliverability OTPs and invitations.
+
+### 📂 Project Structure
+
+```text
+.
+├── apps
+│   ├── api          # NestJS Backend Service
+│   ├── web          # Next.js Frontend Application
+│   └── docs         # System Documentation
+├── packages
+│   ├── ui           # Shared React Component Library
+│   ├── eslint-config # Centralized Linting Rules
+│   └── typescript-config # Base TS Configurations
+└── turbo.json       # Monorepo Orchestration
 ```
 
-## What's inside?
+---
 
-This Turborepo includes the following packages/apps:
+## 🏁 Global Getting Started
 
-### Apps and Packages
+### Prerequisites
+- Node.js v18+ & npm/pnpm
+- PostgreSQL Database
+- Groq API Key (AI features)
+- Brevo API Key (Email features)
+- Lemon Squeezy Store (Billing)
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo build
+### 1. Installation
+```bash
+npm install
 ```
 
-Without global `turbo`, use your package manager:
+### 2. Environment Setup
+You must configure `.env` files in both major applications.
 
-```sh
-cd my-turborepo
-npx turbo build
-npm dlx turbo build
-npm exec turbo build
+#### ⚙️ Backend Setup (`apps/api/.env`)
+```env
+PORT=4000
+DATABASE_URL="postgresql://user:password@localhost:5432/meetgenius"
+JWT_SECRET="your_jwt_secret"
+
+# AI Integration
+GROQ_API_KEY="gsk_..."
+
+# Email (Brevo)
+BREVO_API_KEY="xkeysib-..."
+EMAIL_FROM="MeetGenius <noreply@meetgenius.com>"
+
+# Auth
+GOOGLE_CLIENT_ID="..."
+GOOGLE_CLIENT_SECRET="..."
+FRONTEND_URL="http://localhost:3000"
+
+# Payments (Lemon Squeezy)
+LEMONSQUEEZY_API_KEY="..."
+LEMONSQUEEZY_STORE_ID="..."
+LEMONSQUEEZY_PRO_VARIANT_ID="..."
+LEMONSQUEEZY_ENTERPRISE_VARIANT_ID="..."
+LEMONSQUEEZY_WEBHOOK_SECRET="..."
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo build --filter=docs
+#### 🌐 Frontend Setup (`apps/web/.env.local`)
+```env
+NEXT_PUBLIC_API_URL="http://localhost:4000"
 ```
 
-Without global `turbo`:
-
-```sh
-npx turbo build --filter=docs
-npm exec turbo build --filter=docs
-npm exec turbo build --filter=docs
+### 3. Database Migration
+```bash
+cd apps/api
+npx prisma migrate dev
+npx prisma generate
 ```
 
-### Develop
-
-To develop all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo dev
+### 4. Running the Platform
+From the root directory:
+```bash
+npm run dev
 ```
+- **Web**: `http://localhost:3000`
+- **API**: `http://localhost:4000`
 
-Without global `turbo`, use your package manager:
+---
 
-```sh
-cd my-turborepo
-npx turbo dev
-npm exec turbo dev
-npm exec turbo dev
-```
+## 📡 API Reference & Modules
 
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+### Authentication
+- `POST /auth/register`: Initialize OTP-based registration.
+- `POST /auth/verify-otp`: Finalize registration or login.
+- `GET /auth/google`: Initiate Google OAuth2 flow.
+- `POST /auth/forgot-password`: Request password reset code.
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+### Meeting Notes
+- `GET /notes`: List notes (pagination & workspace filtering).
+- `POST /notes`: Create note with background AI processing.
+- `POST /notes/upload`: Upload audio or documents for parsing.
+- `GET /notes/:id`: Retrieve detailed note with AI insights.
 
-```sh
-turbo dev --filter=web
-```
+### Workspaces & Collaboration
+- `POST /workspaces`: Create a new team workspace.
+- `POST /workspaces/:id/invitations`: Invite members via email.
+- `PATCH /workspaces/:id/members/:userId/role`: Manage member permissions.
 
-Without global `turbo`:
+---
 
-```sh
-npx turbo dev --filter=web
-npm exec turbo dev --filter=web
-npm exec turbo dev --filter=web
-```
+## 🔗 Webhooks & Billing
 
-### Remote Caching
+MeetGenius integrates with **Lemon Squeezy** to handle subscription lifecycle events.
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+- **Webhook Endpoint**: `POST /bill/webhook`
+- **Security**: Verified using `x-signature` header and `LEMONSQUEEZY_WEBHOOK_SECRET`.
+- **Supported Events**:
+  - `subscription_created`: Provisioning access and updating user plan.
+  - `subscription_updated`: Handling plan changes and cancellations.
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+---
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+## 🎨 Frontend Design & UI
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+### 📊 Dashboard Features
+- **Unified Overview**: Recent personal and workspace notes.
+- **AI Insights Sidebar**: Real-time summaries and action items.
+- **Rich Editor**: Optimized for transcript review and task tracking.
+- **PDF Export**: Download high-quality PDF summaries.
 
-```sh
-cd my-turborepo
-turbo login
-```
+### 🎨 Design Philosophy
+- **Rich Aesthetics**: Deep HSL-tailored color palettes and sophisticated gradients.
+- **Glassmorphism**: Elegant translucent UI elements.
+- **Keyboard-First**: Global shortcuts for power users.
 
-Without global `turbo`, use your package manager:
+---
 
-```sh
-cd my-turborepo
-npx turbo login
-npm exec turbo login
-npm exec turbo login
-```
+## 📜 Available Scripts
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+- `npm run dev`: Start all apps in development mode.
+- `npm run build`: Build all apps and packages for production.
+- `npm run lint`: Lint all files in the monorepo.
+- `npm run test`: Run tests across the workspace.
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+---
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+## 📄 License
 
-```sh
-turbo link
-```
+This project is licensed under the [UNLICENSED](LICENSE) license. All rights reserved.
 
-Without global `turbo`:
-
-```sh
-npx turbo link
-npm exec turbo link
-npm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+Developed with ❤️ by Mursalin Leon

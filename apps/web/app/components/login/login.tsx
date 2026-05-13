@@ -46,7 +46,7 @@ export default function Login() {
             <div className="max-w-md w-full bg-white rounded-3xl border border-zinc-200 shadow-xl p-8 space-y-8">
                 {/* Header */}
                 <div className="flex flex-col items-center text-center space-y-4">
-                    <Link href="/landingPage">
+                    <Link href="/">
                         <Logo />
                     </Link>
                     <div className="space-y-1">
@@ -105,7 +105,7 @@ export default function Login() {
                         <input
                             id="email"
                             type="email"
-                            placeholder="you@example.com"
+                            placeholder="Enter your email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required

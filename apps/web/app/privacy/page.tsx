@@ -9,7 +9,7 @@ export default function PrivacyPage() {
     return (
         <div className="min-h-screen bg-white flex flex-col">
             <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-zinc-100 py-4 px-6 flex justify-between items-center">
-                <Link href="/landingPage">
+                <Link href="/">
                     <Logo />
                 </Link>
                 <Link href="/login" className="text-sm font-bold text-zinc-900 hover:text-blue-600 transition-colors">

@@ -15,13 +15,27 @@ export default function Logo({
 }: LogoProps) {
     return (
         <div className={className}>
-            <div className={`${iconSize} bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0`}>
-                <svg suppressHydrationWarning className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                    <path d="M8 10h.01"></path>
-                    <path d="M12 10h.01"></path>
-                    <path d="M16 10h.01"></path>
-                </svg>
+            <div className="relative">
+                {/* Outer Glow Effect - matches the soft bloom in your image */}
+                <div className={`absolute inset-0 ${iconSize} bg-blue-500/30 blur-xl rounded-[12px]`} />
+
+                <div className={`${iconSize} bg-blue-600 rounded-[12px] flex items-center justify-center shadow-lg shadow-blue-600/20 shrink-0 relative z-10 border border-white/10`}>
+                    <svg
+                        suppressHydrationWarning
+                        className="w-[55%] h-[55%] text-white"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    >
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        <circle cx="9" cy="10" r="1" fill="currentColor" stroke="none"></circle>
+                        <circle cx="12" cy="10" r="1" fill="currentColor" stroke="none"></circle>
+                        <circle cx="15" cy="10" r="1" fill="currentColor" stroke="none"></circle>
+                    </svg>
+                </div>
             </div>
             {showText && (
                 <span className={textClassName}>MeetGenius</span>

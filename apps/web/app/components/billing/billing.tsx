@@ -24,8 +24,8 @@ export default function BillingPage() {
 
   useEffect(() => {
     if (authLoading) return;
-    
-    // If not loading and no user, we must redirect
+
+
     if (!user) {
       window.location.href = "/login";
       return;
@@ -79,10 +79,10 @@ export default function BillingPage() {
       />
 
       <div className="flex flex-1 min-h-0">
-        <DashboardSidebar 
-          links={sidebarLinks} 
-          activeLinkId="billing" 
-          user={sidebarUser} 
+        <DashboardSidebar
+          links={sidebarLinks}
+          activeLinkId="billing"
+          user={sidebarUser}
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
         />

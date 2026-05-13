@@ -77,7 +77,7 @@ export default function DashboardSidebar({ links, activeLinkId, user, isOpen, on
           "fixed inset-y-0 left-0 z-[9999] w-72 bg-white border-r border-zinc-200 py-8 px-6 transition-all duration-300 ease-in-out md:relative md:translate-x-0 md:w-64 md:flex md:flex-col shrink-0",
           isOpen ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0 md:opacity-100 md:translate-x-0"
         ].join(" ")}>
-        <div className="flex flex-col gap-1 flex-1">
+        <div className="flex flex-col gap-2 flex-1">
           {links.map((link) => {
             const isActive = link.id === activeLinkId;
             return (

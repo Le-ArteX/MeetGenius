@@ -4,8 +4,8 @@ export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 5000, // 5 seconds timeout
-  withCredentials: true, // This ensures cookies are sent with requests
+  timeout: 5000,
+  withCredentials: true,
   headers: {},
 });
 
@@ -23,11 +23,18 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401 && typeof window !== "undefined") {
-      // Avoid redirect loops if already on login
-      if (!window.location.pathname.startsWith('/login')) {
-        console.warn("Session expired. Redirecting to login...");
+      const currentPath = window.location.pathname;
+
+      const isDashboardPath = currentPath.startsWith('/dashboard') ||
+        currentPath.startsWith('/billing') ||
+        currentPath.startsWith('/settings') ||
+        currentPath.startsWith('/workspaces');
+
+      if (isDashboardPath) {
+        console.warn("Session invalid. Redirecting to login...");
         window.location.href = '/login';
       }
+
     }
     return Promise.reject(error);
   }
@@ -40,8 +47,8 @@ export async function apiRequest<T = any>(endpoint: string, options: any = {}): 
     const response = await api({
       url: endpoint,
       method: options.method || "GET",
-      data: requestData instanceof FormData 
-        ? requestData 
+      data: requestData instanceof FormData
+        ? requestData
         : (typeof requestData === 'string' ? JSON.parse(requestData) : requestData),
       headers: {
         ...options.headers,
@@ -59,11 +66,11 @@ export async function apiRequest<T = any>(endpoint: string, options: any = {}): 
     const status = error.response?.status;
     const backendMessage = error.response?.data?.message;
     const message = backendMessage || error.message || "Something went wrong";
-    
-    const detailedError = status 
+
+    const detailedError = status
       ? `API Error ${status}: ${message}`
       : `Network Error: ${message}`;
-      
+
     throw new Error(detailedError);
   }
 }

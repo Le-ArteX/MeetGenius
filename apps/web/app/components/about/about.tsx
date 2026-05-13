@@ -22,8 +22,7 @@ export default function About(props: AboutProps) {
                             {props.title} <span className="text-blue-500">{props.titleHighlight}</span>
                         </h2>
                         <p className="text-xl text-zinc-600 leading-relaxed">
-                            {props.description}
-                        </p>
+                            {props.description}</p>
                         <div className="p-8 rounded-3xl bg-zinc-50 border border-zinc-100 shadow-sm">
                             <h3 className="text-lg font-semibold mb-3 text-zinc-900">The Why Behind MeetGenius</h3>
                             <p className="text-zinc-600">

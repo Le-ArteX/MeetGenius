@@ -18,7 +18,7 @@ export default function AcceptInvitationPage() {
         if (authLoading) return;
 
         if (!user) {
-            // Redirect to login, then back here after auth
+            // Redirect to login, and then back here after auth
             router.push(`/login?redirect=/dashboard/workspaces/accept?token=${token}`);
             return;
         }

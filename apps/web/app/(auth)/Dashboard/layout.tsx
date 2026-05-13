@@ -27,7 +27,7 @@ export default function DashboardLayout({
   }
 
   if (!user) {
-    return null; // Will redirect in useEffect
+    return null; //  redirect in useEffect
   }
 
   return <>{children}</>;

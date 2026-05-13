@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, useEffect } from "react";
 import { useKeyboardShortcut } from "../../hooks/use-keyboard-shortcut";
@@ -39,13 +39,13 @@ export const ShortcutOverlay = () => {
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm transition-all duration-300">
-      <div 
+      <div
         className="relative w-full max-w-md overflow-hidden bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-white/20 dark:border-zinc-800 shadow-2xl rounded-2xl p-6 transform animate-in fade-in zoom-in duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">Keyboard Shortcuts</h2>
-          <button 
+          <button
             onClick={() => setIsOpen(false)}
             className="p-1 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
           >
@@ -63,7 +63,7 @@ export const ShortcutOverlay = () => {
               </span>
               <div className="flex gap-1.5">
                 {shortcut.keys.map((key, ki) => (
-                  <kbd 
+                  <kbd
                     key={ki}
                     className="inline-flex items-center justify-center min-w-[24px] px-1.5 py-0.5 text-[11px] font-medium text-zinc-500 dark:text-zinc-400 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded shadow-[0_1px_0_rgba(0,0,0,0.1)]"
                   >
