@@ -71,29 +71,14 @@ export default function NoteDetails({ noteId }: { noteId?: string }) {
 
   useEffect(() => {
     if (error || (!loading && !note)) {
-      const timer = setTimeout(() => {
-        router.push("/dashboard");
-      }, 2000);
-      return () => clearTimeout(timer);
+      router.push("/dashboard");
     }
   }, [error, note, loading, router]);
 
-  if (loading) {
+  if (loading || error || !note) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-zinc-50">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-900"></div>
-      </div>
-    );
-  }
-
-  if (error || !note) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-zinc-50 flex-col space-y-4">
-        <h2 className="text-xl font-bold text-zinc-900">{error || "Note not found"}</h2>
-        <p className="text-zinc-500">Returning you to dashboard...</p>
-        <button onClick={() => router.push("/dashboard")} className="text-blue-600 hover:underline">
-          Return to Dashboard
-        </button>
       </div>
     );
   }

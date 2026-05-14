@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useAuth } from "../../context/AuthContext";
+
 
 export interface SidebarLink {
   id: string;
@@ -59,7 +61,9 @@ function SidebarIcon({ icon, className }: { icon: SidebarLink["icon"]; className
 }
 
 export default function DashboardSidebar({ links, activeLinkId, user, isOpen, onClose }: DashboardSidebarProps) {
+  const { logout } = useAuth();
   console.log("[Sidebar] isOpen state changed:", isOpen);
+
 
   return (
     <>
@@ -115,12 +119,16 @@ export default function DashboardSidebar({ links, activeLinkId, user, isOpen, on
             </div>
           </div>
 
-          <Link
-            href="/"
-            className="group flex items-center gap-3 px-4 py-2 rounded-xl text-[13px] font-bold text-zinc-500 hover:bg-red-50 hover:text-red-600 transition-all duration-150">
+          <button
+            onClick={() => {
+              logout();
+              onClose?.();
+            }}
+            className="group flex items-center w-full gap-3 px-4 py-2 rounded-xl text-[13px] font-bold text-zinc-500 hover:bg-red-50 hover:text-red-600 transition-all duration-150 cursor-pointer">
             <SidebarIcon icon="logout" className="w-4 h-4 text-zinc-400 group-hover:text-red-500" />
             Sign out
-          </Link>
+          </button>
+
         </div>
       </aside>
     </>

@@ -58,12 +58,17 @@ export async function apiRequest<T = any>(endpoint: string, options: any = {}): 
     console.log(`[API] Success ${endpoint}:`, response.data);
     return response.data;
   } catch (error: any) {
-    console.warn(`[API] Error [${options.method || "GET"} ${endpoint}]:`, {
-      status: error.response?.status,
-      data: error.response?.data,
-      message: error.message
-    });
     const status = error.response?.status;
+
+    // Silence 401 warnings as they are expected when a user is not logged in
+    if (status !== 401) {
+      console.warn(`[API] Error [${options.method || "GET"} ${endpoint}]:`, {
+        status: status,
+        data: error.response?.data,
+        message: error.message
+      });
+    }
+
     const backendMessage = error.response?.data?.message;
     const message = backendMessage || error.message || "Something went wrong";
 

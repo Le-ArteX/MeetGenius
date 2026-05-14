@@ -38,8 +38,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         ]) as User;
 
         setUser(response);
-      } catch (error) {
-        console.warn("Session verification failed:", error);
+      } catch (error: any) {
+        // Only log if it's not a 401 (Unauthorized) error, which is expected for guests
+        if (!error.message?.includes("401")) {
+          console.warn("Session verification failed:", error);
+        }
         setUser(null);
       } finally {
         setIsLoading(false);
@@ -59,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (e) {
       console.error("Logout failed", e);
     }
-    // Clear residual localStorage tokens just in case
+
     localStorage.removeItem("accessToken");
     setUser(null);
     window.location.href = "/";
