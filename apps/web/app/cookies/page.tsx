@@ -10,16 +10,15 @@ export default function CookiesPage() {
   
   return (
     <div className="min-h-screen bg-white">
-      {/* Simple Header */}
-      <nav className="border-b border-zinc-100 px-6 py-4">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
+      {/* Sticky Header with Glassmorphism */}
+      <nav className="sticky top-0 z-50 border-b border-zinc-200 bg-white/80 backdrop-blur-md px-6 h-16 flex items-center">
+        <div className="max-w-5xl mx-auto w-full flex items-center justify-between">
+          <Link href="/" className="hover:opacity-80 transition-opacity">
             <Logo />
-            <span className="font-bold text-xl tracking-tight text-zinc-900">MeetGenius</span>
           </Link>
           <Link 
             href={user ? "/dashboard" : "/"} 
-            className="text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors"
+            className="text-sm font-bold text-zinc-600 hover:text-zinc-900 transition-colors bg-zinc-50 px-4 py-2 rounded-xl border border-zinc-100"
           >
             {user ? "Back to Dashboard" : "Back to Home"}
           </Link>
