@@ -14,7 +14,7 @@ const sidebarLinks: SidebarLink[] = [
     { id: "settings", label: "Settings", href: "/dashboard/settings", icon: "settings" },
 ];
 
-// --- Types matching backend API responses ---
+
 interface Workspace {
     id: string;
     name: string;
@@ -157,7 +157,7 @@ function WorkspaceCard({
                                 ))}
                             </div>
 
-                            {/* Invite section - only for OWNER and EDITOR */}
+
                             {(myRole === "OWNER" || myRole === "EDITOR") && (
                                 <div className="border-t border-zinc-100 pt-4">
                                     <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3">Invite to {workspace.name}</h4>
@@ -356,7 +356,7 @@ export default function WorkspacesPage() {
     // Search state
     const [searchQuery, setSearchQuery] = useState("");
 
-    const filteredWorkspaces = workspaces.filter(ws => 
+    const filteredWorkspaces = workspaces.filter(ws =>
         ws.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
@@ -366,12 +366,12 @@ export default function WorkspacesPage() {
         <div className="h-screen flex flex-col bg-white">
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
-            <DashboardTopbar 
-                logoText="MeetGenius" 
-                logoHref="/dashboard" 
-                logo={<Logo showText={false} iconSize="w-8 h-8" />} 
+            <DashboardTopbar
+                logoText="MeetGenius"
+                logoHref="/dashboard"
+                logo={<Logo showText={false} iconSize="w-8 h-8" />}
                 onSearch={(val) => setSearchQuery(val)}
-                onMenuClick={() => setIsSidebarOpen(true)} 
+                onMenuClick={() => setIsSidebarOpen(true)}
             />
 
             <div className="flex flex-1 min-h-0">
@@ -454,17 +454,16 @@ export default function WorkspacesPage() {
                                         >
                                             Previous
                                         </button>
-                                        
+
                                         <div className="flex items-center gap-2">
                                             {[...Array(totalPages)].map((_, i) => (
                                                 <button
                                                     key={i + 1}
                                                     onClick={() => setCurrentPage(i + 1)}
-                                                    className={`w-10 h-10 flex items-center justify-center rounded-xl text-sm font-bold transition-all ${
-                                                        currentPage === i + 1 
-                                                            ? "bg-zinc-900 text-white shadow-lg shadow-zinc-200" 
+                                                    className={`w-10 h-10 flex items-center justify-center rounded-xl text-sm font-bold transition-all ${currentPage === i + 1
+                                                            ? "bg-zinc-900 text-white shadow-lg shadow-zinc-200"
                                                             : "text-zinc-500 hover:bg-zinc-100"
-                                                    }`}
+                                                        }`}
                                                 >
                                                     {i + 1}
                                                 </button>

@@ -26,7 +26,7 @@ export class NoteService {
     }
 
     async create(userId: string, dto: CreateNoteDto) {
-        // If workspaceId is provided, verify membership
+
         if (dto.workspaceId) {
             const membership = await this.prisma.workspaceMember.findUnique({
                 where: {
@@ -81,7 +81,7 @@ export class NoteService {
             },
         });
 
-        // Trigger background processing if transcript exists
+
         if (dto.transcript) {
             this.logger.log(`Triggering background processing for note ${note.id} with transcript length ${dto.transcript.length}`);
             this.processNote(note.id, dto.transcript).catch(err => {
@@ -139,23 +139,23 @@ export class NoteService {
                 }
 
                 // Clean up pdfjs-dist resources
-                await parser.destroy().catch(() => {});
+                await parser.destroy().catch(() => { });
 
                 return text;
             }
 
             if (filename.endsWith('.docx') || mimeType.includes('wordprocessingml')) {
                 const mammothModule = require('mammoth');
-                const mammoth = mammothModule.extractRawText 
-                    ? mammothModule 
+                const mammoth = mammothModule.extractRawText
+                    ? mammothModule
                     : (mammothModule.default || mammothModule);
 
                 const result = await mammoth.extractRawText({ buffer: file.buffer });
-                
+
                 if (!result.value.trim()) {
                     throw new Error('Word document extraction resulted in empty text.');
                 }
-                
+
                 return result.value;
             }
 
@@ -183,8 +183,8 @@ export class NoteService {
         try {
 
             // Truncate transcript if it's too long for the model (approx 15k words)
-            const truncatedTranscript = transcript.length > 60000 
-                ? transcript.substring(0, 60000) + "... [Truncated]" 
+            const truncatedTranscript = transcript.length > 60000
+                ? transcript.substring(0, 60000) + "... [Truncated]"
                 : transcript;
 
             const prompt = `
@@ -220,7 +220,7 @@ export class NoteService {
             }
 
             this.logger.log(`AI response received for note ${noteId}. Content length: ${content.length}`);
-            
+
             let result;
             try {
                 result = JSON.parse(content);
@@ -267,14 +267,14 @@ export class NoteService {
         let where: any = {};
 
         if (workspaceId === 'personal') {
-            // Filter for notes that belong to the user but HAVE NO workspace
+
             where = {
                 userId,
                 workspaceId: null,
                 deletedAt: null,
             };
         } else if (workspaceId) {
-            // Filter by a specific workspace ID (ensure user is a member)
+            // specific workspace ID (ensure user is a member)
             where = {
                 workspaceId,
                 deletedAt: null,
@@ -355,7 +355,7 @@ export class NoteService {
         return this.prisma.note.update({
             where: { id },
             data,
-            include: { 
+            include: {
                 actionItems: true,
                 workspace: { select: { name: true } }
             },
@@ -376,9 +376,7 @@ export class NoteService {
 
         if (!note) throw new NotFoundException('Note not found');
 
-        // Allow deletion if:
-        // 1. User is the creator
-        // 2. User is an OWNER or EDITOR in the workspace where the note belongs
+
         const isCreator = note.userId === userId;
         const workspaceMember = note.workspace?.members[0];
         const hasWorkspacePermission = workspaceMember && ['OWNER', 'EDITOR'].includes(workspaceMember.role);

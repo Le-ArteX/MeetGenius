@@ -9,8 +9,8 @@ export default function NotFound() {
   useEffect(() => {
     const path = window.location.pathname;
     const parts = path.split('/').filter(Boolean);
-    
-    // Dynamically redirect to the parent page (e.g., /login/45 -> /login)
+
+
     if (parts.length > 1) {
       router.replace(`/${parts[0]}`);
     } else {

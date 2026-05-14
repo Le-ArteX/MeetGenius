@@ -17,7 +17,7 @@ export default function Register() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
-        
+
         if (password !== confirmPassword) {
             setError("Passwords do not match");
             return;
@@ -30,8 +30,8 @@ export default function Register() {
                 method: 'POST',
                 body: JSON.stringify({ email, password, confirmPassword }),
             });
-            
-            // Success - redirect to verification page with email in query
+
+            // Success then redirect to verification page with email in query
             router.push(`/verify?email=${encodeURIComponent(email)}`);
         } catch (err: any) {
             setError(err.message || "Registration failed");

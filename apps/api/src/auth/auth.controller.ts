@@ -40,7 +40,7 @@ export class AuthController {
   @Get('google')
   @UseGuards(AuthGuard('google'))
   async googleAuth(@Req() req) {
-    // This initiates the Google OAuth flow
+
   }
 
   @Get('google/callback')
@@ -48,7 +48,7 @@ export class AuthController {
   async googleAuthRedirect(@Req() req, @Res() res: express.Response) {
     const result = await this.authService.validateGoogleUser(req.user);
     this.setTokenCookie(res, result.access_token, true); // Google login defaults to rememberMe: true
-    
+
     // Redirect back to frontend dashboard
     return res.redirect('http://localhost:3000/dashboard');
   }
@@ -60,7 +60,7 @@ export class AuthController {
   }
 
   private setTokenCookie(res: express.Response, token: string, rememberMe: boolean = false) {
-    const maxAge = rememberMe 
+    const maxAge = rememberMe
       ? 30 * 24 * 60 * 60 * 1000 // 30 days
       : 10 * 60 * 1000;          // 10 minutes
 

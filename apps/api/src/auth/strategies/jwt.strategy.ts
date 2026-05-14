@@ -32,6 +32,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       throw new UnauthorizedException();
     }
 
-    return user; // This user object is attached to the request (req.user)
+    return user;
   }
 }

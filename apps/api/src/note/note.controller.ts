@@ -26,19 +26,19 @@ export class NoteController {
         const logger = new (require('@nestjs/common').Logger)('NoteController');
 
         if (file) {
-            // --- ENFORCE PLAN LIMITS FOR FILE UPLOADS ---
+
             const user = await this.noteService.getUserPlan(userId);
             if (user?.plan === 'FREE') {
                 throw new ForbiddenException('File uploads are a Pro feature. Please upgrade to Pro to upload audio or documents.');
             }
-            // --------------------------------------------
+
 
             logger.log(`Received file: ${file.originalname}, size: ${file.size}, mimetype: ${file.mimetype}`);
-            
-            const isAudio = file.mimetype.startsWith('audio/') || 
-                            file.mimetype === 'video/webm' || 
-                            file.originalname.match(/\.(mp3|wav|m4a|mp4|webm|ogg)$/i);
-            
+
+            const isAudio = file.mimetype.startsWith('audio/') ||
+                file.mimetype === 'video/webm' ||
+                file.originalname.match(/\.(mp3|wav|m4a|mp4|webm|ogg)$/i);
+
             if (isAudio) {
                 transcript = await this.noteService.transcribeAudio(file);
             } else {
@@ -66,9 +66,9 @@ export class NoteController {
         @Query('limit') limit?: string
     ) {
         return this.noteService.findAll(
-            userId, 
-            workspaceId, 
-            page ? parseInt(page) : 1, 
+            userId,
+            workspaceId,
+            page ? parseInt(page) : 1,
             limit ? parseInt(limit) : 15
         );
     }
@@ -109,7 +109,7 @@ export class NoteController {
         if (user?.plan === 'FREE') {
             throw new ForbiddenException('PDF Export is a Pro feature. Please upgrade to Pro to download your notes.');
         }
-        // --------------------------------------
+
 
         const note = await this.noteService.findOne(userId, id);
         if (!note) throw new NotFoundException('Note not found');

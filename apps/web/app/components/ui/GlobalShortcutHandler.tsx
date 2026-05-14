@@ -11,12 +11,12 @@ export const GlobalShortcutHandler = () => {
     router.push("/dashboard/settings");
   });
 
-  // Ctrl + N -> New Note (Redirect to dashboard where the "New Note" action usually lives)
+  // Ctrl + N -> New Note
   useKeyboardShortcut({ key: "n", ctrlKey: true }, () => {
     router.push("/dashboard?action=new-note");
   });
 
-  // Ctrl + K -> Search (Focus search bar if on dashboard, or redirect)
+  // Ctrl + K -> Search 
   useKeyboardShortcut({ key: "k", ctrlKey: true }, () => {
     const searchInput = document.getElementById("global-search-input");
     if (searchInput) {
@@ -26,5 +26,5 @@ export const GlobalShortcutHandler = () => {
     }
   });
 
-  return null; // This component doesn't render anything
+  return null;
 };

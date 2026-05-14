@@ -5,7 +5,7 @@ import { ROLES_KEY } from '../../common/decorators/app-roles.decorator';
 
 @Injectable()
 export class AppRolesGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+  constructor(private reflector: Reflector) { }
 
   canActivate(context: ExecutionContext): boolean {
     const requiredRoles = this.reflector.getAllAndOverride<AppRole[]>(ROLES_KEY, [
@@ -18,10 +18,8 @@ export class AppRolesGuard implements CanActivate {
     }
 
     const { user } = context.switchToHttp().getRequest();
-    
-    // If no user is attached to request, deny access
     if (!user) {
-        return false;
+      return false;
     }
 
     return requiredRoles.some((role) => user.role === role);

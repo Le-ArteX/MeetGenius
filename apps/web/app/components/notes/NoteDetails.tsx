@@ -71,7 +71,6 @@ export default function NoteDetails({ noteId }: { noteId?: string }) {
 
   useEffect(() => {
     if (error || (!loading && !note)) {
-      // Automatically redirect to main dashboard if note is not found
       const timer = setTimeout(() => {
         router.push("/dashboard");
       }, 2000);

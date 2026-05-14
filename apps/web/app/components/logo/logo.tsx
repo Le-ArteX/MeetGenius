@@ -16,7 +16,7 @@ export default function Logo({
     return (
         <div className={className}>
             <div className="relative">
-                {/* Outer Glow Effect - matches the soft bloom in your image */}
+
                 <div className={`absolute inset-0 ${iconSize} bg-blue-500/30 blur-xl rounded-[12px]`} />
 
                 <div className={`${iconSize} bg-blue-600 rounded-[12px] flex items-center justify-center shadow-lg shadow-blue-600/20 shrink-0 relative z-10 border border-white/10`}>

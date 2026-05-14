@@ -157,7 +157,7 @@ export class BillService {
         const attrs = data.attributes;
         const SubId = String(data.id);
 
-        // Find by SubId if userId is not in custom_data
+
         const subscription = userId
             ? await this.prisma.subscription.findUnique({ where: { userId } })
             : await this.prisma.subscription.findUnique({ where: { SubId } });

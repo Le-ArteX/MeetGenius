@@ -70,7 +70,6 @@ export async function apiRequest<T = any>(endpoint: string, options: any = {}): 
     const detailedError = status
       ? `API Error ${status}: ${message}`
       : `Network Error: ${message}`;
-
     throw new Error(detailedError);
   }
 }

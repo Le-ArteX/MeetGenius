@@ -27,7 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const verifySession = async () => {
-      const timeoutPromise = new Promise((_, reject) => 
+      const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error("Auth timeout")), 5000)
       );
 
@@ -36,7 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           apiRequest<{ id: string; email: string; role: string; plan: string; isVerified: boolean; avatarUrl?: string | null }>('/users/profile'),
           timeoutPromise
         ]) as User;
-        
+
         setUser(response);
       } catch (error) {
         console.warn("Session verification failed:", error);
@@ -50,7 +50,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = (token: string, userData: User) => {
-    // We no longer need to save the token in localStorage since it's now a secure HTTP-Only Cookie!
     setUser(userData);
   };
 
@@ -60,6 +59,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (e) {
       console.error("Logout failed", e);
     }
+    // Clear residual localStorage tokens just in case
+    localStorage.removeItem("accessToken");
     setUser(null);
     window.location.href = "/";
   };

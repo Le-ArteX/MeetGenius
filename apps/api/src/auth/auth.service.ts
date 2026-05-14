@@ -20,7 +20,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
-  ) {}
+  ) { }
 
   async register(dto: RegisterDto) {
     if (dto.password !== dto.confirmPassword) {
@@ -28,42 +28,41 @@ export class AuthService {
     }
 
     const hashedPassword = await bcrypt.hash(dto.password, 10);
-    
-    // Check if user already exists
+
+
     const existingUser = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
 
     let user;
     if (existingUser) {
-        if (existingUser.isVerified) {
-            throw new BadRequestException('User already exists and is verified');
-        }
-        // Update unverified user with new password if they try to register again
-        user = await this.prisma.user.update({
-            where: { id: existingUser.id },
-            data: { password: hashedPassword }
-        });
+      if (existingUser.isVerified) {
+        throw new BadRequestException('User already exists and is verified');
+      }
+      user = await this.prisma.user.update({
+        where: { id: existingUser.id },
+        data: { password: hashedPassword }
+      });
     } else {
-        user = await this.prisma.user.create({
-            data: {
-                email: dto.email,
-                password: hashedPassword,
-                isVerified: false,
-            },
-        });
+      user = await this.prisma.user.create({
+        data: {
+          email: dto.email,
+          password: hashedPassword,
+          isVerified: false,
+        },
+      });
     }
 
-    // Generate 6-digit OTP
+
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    
+
     await this.prisma.otpCode.create({
-        data: {
-            userId: user.id,
-            code: otp,
-            type: 'REGISTER',
-            expiresAt: new Date(Date.now() + 2 * 60 * 1000), // 2 minutes
-        }
+      data: {
+        userId: user.id,
+        code: otp,
+        type: 'REGISTER',
+        expiresAt: new Date(Date.now() + 2 * 60 * 1000),
+      }
     });
 
     await this.mailService.sendOtpEmail(user.email, otp, 'REGISTER');
@@ -95,7 +94,7 @@ export class AuthService {
         userId: user.id,
         code: otp,
         type: 'REGISTER',
-        expiresAt: new Date(Date.now() + 2 * 60 * 1000), // 2 minutes
+        expiresAt: new Date(Date.now() + 2 * 60 * 1000),
       },
     });
 
@@ -128,14 +127,14 @@ export class AuthService {
     }
 
     const updatedUser = await this.prisma.$transaction(async (tx) => {
-        await tx.otpCode.update({
-            where: { id: otpRecord.id },
-            data: { used: true },
-        });
-        return tx.user.update({
-            where: { id: user.id },
-            data: { isVerified: true },
-        });
+      await tx.otpCode.update({
+        where: { id: otpRecord.id },
+        data: { used: true },
+      });
+      return tx.user.update({
+        where: { id: user.id },
+        data: { isVerified: true },
+      });
     });
 
     const token = await this.generateToken(updatedUser.id, updatedUser.email, updatedUser.role);
@@ -149,13 +148,13 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
-    
+
     if (!user) {
       throw new UnauthorizedException('Incorrect email or password');
     }
 
     if (!user.isVerified) {
-        throw new UnauthorizedException('Please verify your email before logging in');
+      throw new UnauthorizedException('Please verify your email before logging in');
     }
 
     const isPasswordValid = await bcrypt.compare(dto.password, user.password);
@@ -172,33 +171,32 @@ export class AuthService {
 
   async validateGoogleUser(googleUser: any) {
     const { email, firstName, lastName, picture } = googleUser;
-    
+
     let user = await this.prisma.user.findUnique({
       where: { email },
     });
 
     if (!user) {
-      // Create new user if they don't exist
-      // We set a random password because they are using Google
+
       const randomPassword = Math.random().toString(36).slice(-12);
       const hashedPassword = await bcrypt.hash(randomPassword, 10);
-      
+
       user = await this.prisma.user.create({
         data: {
           email,
           name: `${firstName} ${lastName}`.trim(),
           avatarUrl: picture,
           password: hashedPassword,
-          isVerified: true, // Google users are already verified
+          isVerified: true,
         },
       });
     } else if (!user.isVerified) {
-        // If user existed but wasn't verified (e.g. registered with email but never verified), 
-        // verify them now because Google verified them
-        user = await this.prisma.user.update({
-            where: { id: user.id },
-            data: { isVerified: true }
-        });
+      // if user existed but wasn't verified , 
+      // verify them now because Google verified them
+      user = await this.prisma.user.update({
+        where: { id: user.id },
+        data: { isVerified: true }
+      });
     }
 
     const token = await this.generateToken(user.id, user.email, user.role);
@@ -214,7 +212,7 @@ export class AuthService {
     });
 
     if (user) {
-      // Generate 6-digit OTP
+
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
       await this.prisma.otpCode.create({
@@ -222,7 +220,7 @@ export class AuthService {
           userId: user.id,
           code: otp,
           type: 'RESET',
-          expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes
+          expiresAt: new Date(Date.now() + 5 * 60 * 1000),
         },
       });
 
@@ -262,7 +260,7 @@ export class AuthService {
     if (!otpRecord) {
       console.log(`[DEBUG] OTP Verification failed at: ${new Date().toISOString()}`);
       console.log(`[DEBUG] OTP Record not found, used, or expired for user ${user.id}`);
-      const lastCode = await this.prisma.otpCode.findFirst({ 
+      const lastCode = await this.prisma.otpCode.findFirst({
         where: { userId: user.id },
         orderBy: { createdAt: 'desc' }
       });
@@ -271,7 +269,7 @@ export class AuthService {
     }
 
     const hashedPassword = await bcrypt.hash(dto.password, 10);
-    
+
     await this.prisma.$transaction([
       this.prisma.otpCode.update({
         where: { id: otpRecord.id },

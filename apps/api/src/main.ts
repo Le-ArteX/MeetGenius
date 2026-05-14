@@ -7,7 +7,7 @@ import { useContainer } from 'class-validator';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    rawBody: true, //webhooks signature verification required for stripe
+    rawBody: true, //webhooks signature verification required for lemon squeezy
   });
 
   const cookieParser = require('cookie-parser');

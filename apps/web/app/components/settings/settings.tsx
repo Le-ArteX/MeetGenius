@@ -63,7 +63,7 @@ export default function Settings() {
       setPendingAvatar(null);
       setSaved(true);
       setPassword("");
-      // Force refresh auth context if needed or just let it be
+
     } catch (err: any) {
       setError(err.message || "Failed to update profile");
     } finally {
@@ -148,10 +148,10 @@ export default function Settings() {
       />
 
       <div className="flex flex-1 min-h-0">
-        <DashboardSidebar 
-          links={sidebarLinks} 
-          activeLinkId="settings" 
-          user={sidebarUser} 
+        <DashboardSidebar
+          links={sidebarLinks}
+          activeLinkId="settings"
+          user={sidebarUser}
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
         />
@@ -187,7 +187,7 @@ export default function Settings() {
                   <div>
                     <h2 className="text-lg font-bold text-zinc-900">{user?.name || "User"}</h2>
                     <p className="text-sm text-zinc-500 mb-3">{user?.email}</p>
-                    <button 
+                    <button
                       type="button"
                       onClick={handleAvatarClick}
                       className="text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
@@ -252,19 +252,19 @@ export default function Settings() {
               <div className="bg-white border border-red-100 rounded-2xl p-8 shadow-sm">
                 <h2 className="text-lg font-bold text-red-600 mb-2">Danger Zone</h2>
                 <p className="text-sm text-zinc-500 mb-6">Once you delete your account, there is no going back. Please be certain.</p>
-                
+
                 {showDeleteConfirm ? (
                   <div className="bg-red-50 p-6 rounded-xl border border-red-100 animate-in fade-in zoom-in duration-300">
                     <p className="text-sm font-bold text-red-700 mb-4">Are you absolutely sure? All your notes and workspaces will be permanently deleted.</p>
                     <div className="flex items-center gap-3">
-                      <button 
+                      <button
                         onClick={handleDeleteAccount}
                         disabled={saving}
                         className="bg-red-600 text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-red-700 transition-all cursor-pointer"
                       >
                         {saving ? "Deleting..." : "Yes, Delete Everything"}
                       </button>
-                      <button 
+                      <button
                         onClick={() => setShowDeleteConfirm(false)}
                         className="bg-white text-zinc-600 border border-zinc-200 px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-zinc-50 transition-all cursor-pointer"
                       >
@@ -273,7 +273,7 @@ export default function Settings() {
                     </div>
                   </div>
                 ) : (
-                  <button 
+                  <button
                     onClick={() => setShowDeleteConfirm(true)}
                     className="bg-red-50 text-red-600 border border-red-200 px-6 py-3 rounded-xl font-bold text-sm hover:bg-red-100 transition-all cursor-pointer"
                   >
